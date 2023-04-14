@@ -1,5 +1,6 @@
 import React, { FC } from 'react'
 import Head from 'next/head'
+import Chat from '@/components/chat'
 
 const Home: FC = () => {
     return (
@@ -10,8 +11,7 @@ const Home: FC = () => {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <main>
-            </main>
+            <Chat />
         </>
     )
 }
