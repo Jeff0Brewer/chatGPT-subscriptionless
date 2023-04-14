@@ -1,3 +1,36 @@
 {
-  "extends": "next/core-web-vitals"
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "plugin:@next/next/recommended",
+        "plugin:react/recommended",
+        "plugin:@typescript-eslint/recommended",
+        "standard"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint",
+        "react"
+    ],
+    "rules": {
+        "react/prop-types": "off",
+        "indent": ["error", 4, { "SwitchCase": 1 }],
+        "@typescript-eslint/explicit-function-return-type": "error"
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        },
+        "import/resolver": {
+            "node": {
+                "extensions": [".ts", ".tsx"]
+            }
+        }
+    }
 }
