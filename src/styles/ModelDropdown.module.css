@@ -1,0 +1,93 @@
+.dropdown {
+    position: relative;
+    width: 350px;
+}
+
+.toggle, .list {
+    border: solid 1px var(--border-color);
+    border-radius: 5px;
+}
+
+.toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px 40px 8px 12px;
+    background-color: var(--bg-color);
+    font: inherit;
+}
+
+.label, .curr {
+    text-align: left;
+}
+
+.label {
+    font-size: 12px;
+    color: #8e8ea0;
+}
+
+.curr {
+    font-size: 14px;
+    color: #fff;
+    line-height: 24px;
+}
+
+.arrow {
+    position: absolute;
+    right: 0;
+    width: 30px;
+    color: #acacbe;
+    font-size: 20px;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 7px;
+    transition: opacity .2s ease;
+}
+
+.list a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 42px;
+    font-size: 12px;
+    padding: 0 12px;
+    border-bottom: solid 1px var(--border-color);
+}
+
+.list a:hover {
+    background-color: #3f414f;
+}
+
+.list a:last-child {
+    border: none;
+}
+
+.list a[data-selected="true"] {
+    font-weight: 600;
+}
+
+.check {
+    font-size: 16px;
+    color: #ececf1;
+}
+
+.list a * {
+    opacity: 0;
+}
+
+.list a[data-selected="true"] * {
+    opacity: 1;
+}
+
+.visible {
+    opacity: 1;
+}
+
+.hidden {
+    opacity: 0;
+}
