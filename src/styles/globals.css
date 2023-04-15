@@ -16,3 +16,8 @@ html, body {
         Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, Helvetica Neue,
         Arial, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 }
+
+textarea {
+    font: inherit;
+    resize: none;
+}
