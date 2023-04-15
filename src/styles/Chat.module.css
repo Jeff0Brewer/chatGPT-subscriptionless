@@ -9,3 +9,59 @@
     left: 0;
     right: 0;
 }
+
+.bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.messageInput {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 675px;
+    background-color: #3f414f;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.messageInput * {
+    border: none;
+    background-color: transparent;
+}
+
+.messageInput input {
+    width: calc(100% - 50px);
+    height: 50px;
+    font-size: 16px;
+    color: #fff;
+    padding-left: 16px;
+}
+
+.messageInput input::placeholder {
+    color: #8e8ea0;
+    opacity: 1; /* for Firefox */
+}
+
+.messageInput button {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+    color: #8e8ea0;
+}
+
+.messageInput button:hover {
+    background-color: #212123;
+}
+
+.footer {
+    font-size: 12px;
+    color: #ffffff80;
+    padding: 12px 16px 24px;
+}
