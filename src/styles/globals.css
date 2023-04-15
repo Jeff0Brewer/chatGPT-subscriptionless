@@ -1,3 +1,8 @@
+:root {
+    --bg-color: #343540;
+    --border-color: #63636C;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -7,4 +12,7 @@
 html, body {
     color: #fff;
     background-color: #222;
+    font-family: Söhne, ui-sans-serif, system-ui, -apple-system, Segoe UI,
+        Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, Helvetica Neue,
+        Arial, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 }
