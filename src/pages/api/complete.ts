@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import type { ChatCompletionRequestMessage, OpenAIApi } from 'openai'
+import type { ChatCompletionRequestMessage } from 'openai'
+import OpenAi from '@/lib/openai'
 import { MODELS } from '@/lib/models'
 
 type Data = {
@@ -18,12 +19,7 @@ const complete = async (
         res.status(405).json({ content: 'Invalid message list' })
         return
     }
-    if (!(req.body?.api satisfies OpenAIApi)) {
-        res.status(405).json({ content: 'Invalid api instance' })
-        return
-    }
-    const openai: OpenAIApi = req.body.api
-    const completion = await openai.createChatCompletion({
+    const completion = await OpenAi.createChatCompletion({
         model: req.body.model,
         messages: req.body.messages
     })
