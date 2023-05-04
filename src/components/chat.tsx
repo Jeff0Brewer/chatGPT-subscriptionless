@@ -20,7 +20,6 @@ const Chat: FC = () => {
 
     // complete current message list, append new message
     const getCompletion = async (): Promise<void> => {
-        console.log(model)
         const res = await fetch('/api/complete', jsonPostBody({ model, messages }))
         if (!res.ok) {
             const { message } = await res.json()
