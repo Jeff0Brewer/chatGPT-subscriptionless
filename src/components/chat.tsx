@@ -5,8 +5,10 @@ import MessageInput from '@/components/message-input'
 import { jsonPostBody } from '@/lib/fetch'
 import styles from '@/styles/Chat.module.css'
 
+const DEFAULT_MODEL = 'gpt-3.5-turbo'
+
 const Chat: FC = () => {
-    const [model, setModel] = useState<string | null>(null)
+    const [model, setModel] = useState<string>(DEFAULT_MODEL)
     const [messages, setMessages] = useState<Array<Message>>([])
 
     useEffect(() => {
