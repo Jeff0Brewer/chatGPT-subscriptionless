@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC, useState, useEffect } from 'react'
 import { RxCaretDown } from 'react-icons/rx'
 import { MdCheck } from 'react-icons/md'
 import styles from '@/styles/ModelDropdown.module.css'
@@ -10,6 +10,21 @@ type ModelDropdownProps = {
 
 const ModelDropdown: FC<ModelDropdownProps> = props => {
     const [open, setOpen] = useState<boolean>(false)
+    const [models, setModels] = useState<Array<string>>([])
+
+    useEffect(() => {
+        getModels()
+    }, [])
+
+    const getModels = async (): Promise<void> => {
+        const res = await fetch('/api/models')
+        if (!res.ok) {
+            const { message } = await res.json()
+            throw new Error(`Model list could not be retrieved: ${message}`)
+        }
+        const { models } = await res.json()
+        setModels(models)
+    }
 
     const closeOnBlur = (e: React.FocusEvent<HTMLDivElement>): void => {
         // check if child element has focus
@@ -44,7 +59,7 @@ const ModelDropdown: FC<ModelDropdownProps> = props => {
                 <div className={styles.arrow}><RxCaretDown /></div>
             </button>
             <div className={`${styles.list} ${open ? styles.visible : styles.hidden}`}>{
-                [].map((model: string, i: number) => (
+                models.map((model: string, i: number) => (
                     <a
                         onClick={getModelSetter(model)}
                         data-selected={model === props.model}
