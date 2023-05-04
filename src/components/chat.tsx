@@ -19,10 +19,11 @@ const Chat: FC = () => {
     // complete current message list, append new message
     const getCompletion = async (): Promise<void> => {
         const res = await fetch('/api/complete', jsonPostBody({ model, messages }))
-        const { content } = await res.json()
         if (!res.ok) {
-            throw new Error(`Completion error: ${content}`)
+            const { message } = await res.json()
+            throw new Error(`Completion error: ${message}`)
         }
+        const { content } = await res.json()
         setMessages([...messages, { role: 'assistant', content }])
     }
 
