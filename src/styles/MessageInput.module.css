@@ -1,0 +1,43 @@
+.wrap {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    width: 100%;
+    max-width: 675px;
+    background-color: #3f414f;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 0 20px #0001;
+}
+
+.wrap * {
+    border: none;
+    background-color: transparent;
+}
+
+.wrap textarea {
+    position: relative;
+    z-index: 10;
+    width: calc(100% - 50px);
+    height: 50px;
+    font-size: 16px;
+    color: #fff;
+    padding: 16px;
+}
+
+.wrap textarea::placeholder {
+    color: #8e8ea0;
+    opacity: 1; /* for Firefox */
+}
+
+.wrap button {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+    border-radius: 5px;
+    color: #8e8ea0;
+}
+
+.wrap button:hover {
+    background-color: #212123;
+}
