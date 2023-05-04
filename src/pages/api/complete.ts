@@ -20,7 +20,7 @@ const complete = async (
         return
     }
     const completion = await OpenAi.createChatCompletion({
-        model: req.body.model,
+        model: req.body.model.toLowerCase(),
         messages: req.body.messages
     })
     const { choices } = completion.data

@@ -5,7 +5,7 @@ import MessageInput from '@/components/message-input'
 import { jsonPostBody } from '@/lib/fetch'
 import styles from '@/styles/Chat.module.css'
 
-const DEFAULT_MODEL = 'gpt-3.5-turbo'
+const DEFAULT_MODEL = 'GPT-3.5-turbo'
 
 const Chat: FC = () => {
     const [model, setModel] = useState<string>(DEFAULT_MODEL)
@@ -20,6 +20,7 @@ const Chat: FC = () => {
 
     // complete current message list, append new message
     const getCompletion = async (): Promise<void> => {
+        console.log(model)
         const res = await fetch('/api/complete', jsonPostBody({ model, messages }))
         if (!res.ok) {
             const { message } = await res.json()
