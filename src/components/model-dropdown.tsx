@@ -1,7 +1,6 @@
 import React, { FC, useState } from 'react'
 import { RxCaretDown } from 'react-icons/rx'
 import { MdCheck } from 'react-icons/md'
-import { MODELS, MODEL_INFO } from '@/lib/models'
 import styles from '@/styles/ModelDropdown.module.css'
 
 type ModelDropdownProps = {
@@ -40,18 +39,18 @@ const ModelDropdown: FC<ModelDropdownProps> = props => {
             <button className={styles.toggle} onClick={toggleOpen}>
                 <div>
                     <p className={styles.label}>Model</p>
-                    <p className={styles.curr}>{MODEL_INFO[props.model].name}</p>
+                    <p className={styles.curr}>{props.model}</p>
                 </div>
                 <div className={styles.arrow}><RxCaretDown /></div>
             </button>
             <div className={`${styles.list} ${open ? styles.visible : styles.hidden}`}>{
-                MODELS.map((model: string, i: number) => (
+                [].map((model: string, i: number) => (
                     <a
                         onClick={getModelSetter(model)}
                         data-selected={model === props.model}
                         key={i}
                     >
-                        {MODEL_INFO[model].name}
+                        {model}
                         <div className={styles.check}><MdCheck /></div>
                     </a>
                 ))

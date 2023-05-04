@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import type { ChatCompletionRequestMessage } from 'openai'
 import OpenAi from '@/lib/openai'
-import { MODELS } from '@/lib/models'
 
 type Data = {
     content: string
@@ -11,7 +10,7 @@ const complete = async (
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ): Promise<void> => {
-    if (!MODELS.includes(req.body?.model)) {
+    if (typeof req.body?.model !== 'string') {
         res.status(405).json({ content: 'Invalid model id' })
         return
     }

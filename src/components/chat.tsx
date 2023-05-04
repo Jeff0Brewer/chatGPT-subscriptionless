@@ -2,11 +2,10 @@ import React, { FC, useState, useEffect, useRef } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import { TbSend } from 'react-icons/tb'
 import ModelDropdown from '@/components/model-dropdown'
-import { MODELS } from '@/lib/models'
 import styles from '@/styles/Chat.module.css'
 
 const Chat: FC = () => {
-    const [model, setModel] = useState<string>(MODELS[0])
+    const [model, setModel] = useState<string>('gpt-3.5-turbo')
     const [messages, setMessages] = useState<Array<Message>>([])
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
