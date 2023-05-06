@@ -5,6 +5,10 @@ import MessageInput from '@/components/message-input'
 import { jsonPostBody } from '@/lib/fetch'
 import styles from '@/styles/Chat.module.css'
 
+import Image from 'next/image'
+import userIcon from '@/icons/user-icon.jpg'
+import gptIcon from '@/icons/gpt-icon.jpg'
+
 const DEFAULT_MODEL = 'GPT-3.5-turbo'
 
 const Chat: FC = () => {
@@ -36,7 +40,9 @@ const Chat: FC = () => {
 
     return (
         <main className={styles.chat}>
-            <ModelDropdown model={model} setModel={setModel} />
+            { messages.length === 0
+                ? <ModelDropdown model={model} setModel={setModel} />
+                : <MessageList model={model} messages={messages} /> }
             <div className={styles.bottom}>
                 <MessageInput addMessage={addMessage} />
                 <p className={styles.footer}>
@@ -44,6 +50,45 @@ const Chat: FC = () => {
                 </p>
             </div>
         </main>
+    )
+}
+
+type MessageListProps = {
+    model: string,
+    messages: Array<Message>
+}
+
+const MessageList: FC<MessageListProps> = props => {
+    return (
+        <section className={styles.list}>
+            <p className={styles.modelLabel}>Model: {props.model}</p>
+            <div>
+                { props.messages.map(({ role, content }, i) =>
+                    <MessageDisplay role={role} content={content} key={i} />
+                )}
+            </div>
+        </section>
+    )
+}
+
+type MessageDisplayProps = {
+    role: 'user' | 'assistant' | 'system'
+    content: string
+}
+const MessageDisplay: FC<MessageDisplayProps> = props => {
+    return (
+        <div className={styles.messageDisplay} data-role={props.role}>
+            <span className={styles.inner}>
+                <Image
+                    className={styles.icon}
+                    width={40}
+                    height={40}
+                    src={props.role === 'user' ? userIcon.src : gptIcon.src}
+                    alt={props.role}
+                />
+                <p className={styles.content}>{ props.content }</p>
+            </span>
+        </div>
     )
 }
 
