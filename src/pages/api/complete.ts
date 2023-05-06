@@ -21,18 +21,35 @@ const complete = async (
     }
     const completion = await OpenAi.createChatCompletion({
         model: req.body.model.toLowerCase(),
-        messages: req.body.messages
+        messages: req.body.messages,
+        stream: true
+    }, { responseType: 'stream' })
+
+    const stream = new Promise(resolve => {
+        let result = ''
+        completion.data.on('data', (data: Buffer) => {
+            const lines = data
+                .toString()
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line !== '')
+            for (const line of lines) {
+                const response = line.replace(/^data: /, '')
+                if (response === '[DONE]') {
+                    resolve(result)
+                } else {
+                    const token = JSON.parse(response)?.choices?.[0]?.delta?.content
+                    if (token) {
+                        result += token
+                    }
+                }
+            }
+        })
     })
-    const { choices } = completion.data
-    if (
-        choices.length > 0 &&
-        choices[0]?.message &&
-        choices[0]?.finish_reason === 'stop'
-    ) {
-        res.status(200).json({ content: choices[0].message.content })
-        return
-    }
-    res.status(500).json({ message: 'Completion failed' })
+
+    res.status(200).json({ content: 'none' })
+
+    // res.status(500).json({ message: 'Completion failed' })
 }
 
 export default complete
