@@ -1,0 +1,49 @@
+.modelLabel {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    padding: 12px;
+    color: #BFBFCC;
+    background-color: #444654;
+}
+
+.list {
+    width: 100%;
+    padding-bottom: 200px;
+}
+
+.messageDisplay[data-role="assistant"] {
+    background-color: #444654;
+}
+
+.messageDisplay[data-role="user"] {
+    background-color: #343540;
+}
+
+.inner {
+    display: flex;
+    max-width: 700px;
+    margin: auto;
+    padding: 30px 0;
+}
+
+.icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+}
+
+.content {
+    font-size: 16px;
+    padding-left: 24px;
+    max-width: 650px;
+}
+
+.content pre code {
+    display: block;
+    width: 100%;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 5px;
+    background-color: #000;
+}

@@ -2,13 +2,9 @@ import React, { FC, useState, useEffect } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
+import MessageList from '@/components/message-list'
 import { jsonPostBody } from '@/lib/fetch'
 import styles from '@/styles/Chat.module.css'
-
-import Image from 'next/image'
-import userIcon from '@/icons/user-icon.jpg'
-import gptIcon from '@/icons/gpt-icon.jpg'
-import ReactMarkdown from 'react-markdown'
 
 const DEFAULT_MODEL = 'GPT-3.5-turbo'
 
@@ -17,7 +13,6 @@ const Chat: FC = () => {
     const [messages, setMessages] = useState<Array<Message>>([])
 
     useEffect(() => {
-        console.log(messages)
         if (messages.length && messages[messages.length - 1].role === 'user') {
             getCompletion()
         }
@@ -51,47 +46,6 @@ const Chat: FC = () => {
                 </p>
             </div>
         </main>
-    )
-}
-
-type MessageListProps = {
-    model: string,
-    messages: Array<Message>
-}
-
-const MessageList: FC<MessageListProps> = props => {
-    return (
-        <section className={styles.list}>
-            <p className={styles.modelLabel}>Model: {props.model}</p>
-            <div>
-                { props.messages.map(({ role, content }, i) =>
-                    <MessageDisplay role={role} content={content} key={i} />
-                )}
-            </div>
-        </section>
-    )
-}
-
-type MessageDisplayProps = {
-    role: 'user' | 'assistant' | 'system'
-    content: string
-}
-const MessageDisplay: FC<MessageDisplayProps> = props => {
-    return (
-        <div className={styles.messageDisplay} data-role={props.role}>
-            <span className={styles.inner}>
-                <Image
-                    className={styles.icon}
-                    width={40}
-                    height={40}
-                    src={props.role === 'user' ? userIcon.src : gptIcon.src}
-                    alt={props.role}
-                />
-                <ReactMarkdown className={styles.content}>
-                    {props.content}
-                </ReactMarkdown>
-            </span>
-        </div>
     )
 }
 
