@@ -8,6 +8,7 @@ import styles from '@/styles/Chat.module.css'
 import Image from 'next/image'
 import userIcon from '@/icons/user-icon.jpg'
 import gptIcon from '@/icons/gpt-icon.jpg'
+import ReactMarkdown from 'react-markdown'
 
 const DEFAULT_MODEL = 'GPT-3.5-turbo'
 
@@ -86,7 +87,9 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                     src={props.role === 'user' ? userIcon.src : gptIcon.src}
                     alt={props.role}
                 />
-                <p className={styles.content}>{ props.content }</p>
+                <ReactMarkdown className={styles.content}>
+                    {props.content}
+                </ReactMarkdown>
             </span>
         </div>
     )
