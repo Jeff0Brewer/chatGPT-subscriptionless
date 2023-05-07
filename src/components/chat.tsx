@@ -29,13 +29,10 @@ const Chat: FC = () => {
         if (!reader) {
             throw new Error('Invalid stream reader from endpoint')
         }
-        // explicit any type since ReadableStreamReadResult interface is private :)
         let content = ''
+        // explicit any type since ReadableStreamReadResult interface is private :)
         const readStream = ({ done, value }: any): Promise<void> | void => {
-            if (done) {
-                console.log('stream end')
-                return
-            }
+            if (done) { return }
             const lines = Buffer.from(value)
                 .toString()
                 .split('\n')
