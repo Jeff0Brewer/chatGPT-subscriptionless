@@ -20,10 +20,8 @@
     background-color: #343540;
 }
 
-.display button {
-    background-color: transparent;
-    border: none;
-    color: #acacbe;
+.display pre {
+    font: inherit;
 }
 
 .inner {
@@ -40,6 +38,26 @@
     border-radius: 3px;
 }
 
+.content {
+    font-size: 16px;
+    margin-left: 24px;
+    width: 100%;
+    max-width: 650px;
+}
+
+.content textarea {
+    width: 100%;
+}
+
+.content pre code {
+    display: block;
+    width: 100%;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 5px;
+    background-color: #000;
+    overflow-x: scroll;
+}
 
 .edit {
     display: none;
@@ -48,9 +66,12 @@
     padding-top: inherit;
     top: 0;
     right: -20px;
+    background-color: transparent;
+    border: none;
+    color: #acacbe;
 }
 
-.display[data-role = "user"]:hover .edit {
+.display:hover .edit {
     display: block;
 }
 
@@ -69,18 +90,33 @@
     background-color: #fff1;
 }
 
-.content {
-    font-size: 16px;
-    padding-left: 24px;
-    max-width: 650px;
+.saveEdit, .cancelEdit {
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #fff;
+    border-radius: 3px;
 }
 
-.content pre code {
-    display: block;
-    width: 100%;
-    padding: 20px;
-    margin: 20px;
-    border-radius: 5px;
-    background-color: #000;
-    overflow-x: scroll;
+.saveEdit {
+    background-color: #0FA27F;
+    border: none;
+    margin-right: 8px;
+}
+
+.saveEdit:hover {
+    background-color: #0d8f70;
+}
+
+.cancelEdit {
+    background-color: transparent;
+    border: 1px solid #fff3;
+}
+
+.cancelEdit:hover {
+    background-color: #fff1;
+}
+
+.editButtons {
+    display: flex;
+    justify-content: center;
 }

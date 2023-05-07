@@ -1,9 +1,10 @@
-import React, { FC } from 'react'
+import React, { FC, useState, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
-import { FiEdit } from 'react-icons/fi'
+import { FiEdit, FiRefreshCcw } from 'react-icons/fi'
 import type { TreeNode } from '@/lib/message-tree'
 import { impl as tr } from '@/lib/message-tree'
+import { resizeToFit } from '@/lib/textarea'
 import userIcon from '@/icons/user-icon.jpg'
 import gptIcon from '@/icons/gpt-icon.jpg'
 import styles from '@/styles/MessageList.module.css'
@@ -31,21 +32,72 @@ type MessageDisplayProps = {
 }
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
+    const [editing, setEditing] = useState<boolean>(false)
+    const inputRef = useRef<HTMLTextAreaElement>(null)
+    const message = props.node.message
+
+    const startEdit = (): void => {
+        setEditing(true)
+    }
+
+    const regenResponse = (): void => {
+        // placeholder
+    }
+
+    const resizeInput = (): void => {
+        if (!inputRef.current) { return }
+        resizeToFit(inputRef.current)
+    }
+
+    const saveEdit = (): void => {
+        if (!inputRef.current) { return }
+        const content = inputRef.current.value
+        setEditing(false)
+    }
+
+    const cancelEdit = (): void => {
+        setEditing(false)
+    }
+
     return (
         <>
-            <div className={styles.display} data-role={props.node.message.role}>
+            <div className={styles.display} data-role={message.role}>
                 <span className={styles.inner}>
                     <Image
                         className={styles.icon}
                         width={40}
                         height={40}
-                        src={props.node.message.role === 'user' ? userIcon.src : gptIcon.src}
-                        alt={props.node.message.role}
+                        src={message.role === 'user' ? userIcon.src : gptIcon.src}
+                        alt={message.role}
                     />
-                    <ReactMarkdown className={styles.content}>
-                        {props.node.message.content}
-                    </ReactMarkdown>
-                    <button className={styles.edit}><FiEdit /></button>
+                    { message.role === 'user'
+                        ? editing
+                            ? <div className={styles.content}>
+                                <textarea
+                                    ref={inputRef}
+                                    onInput={resizeInput}
+                                    defaultValue={message.content}
+                                />
+                                <div className={styles.editButtons}>
+                                    <button className={styles.saveEdit} onClick={saveEdit}>
+                                        Save & Submit
+                                    </button>
+                                    <button className={styles.cancelEdit} onClick={cancelEdit}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                            : <pre className={styles.content}>{message.content}</pre>
+                        : <ReactMarkdown className={styles.content}>{message.content}</ReactMarkdown> }
+                    <button
+                        className={styles.edit}
+                        onClick={message.role === 'user' ? startEdit : regenResponse}
+                    >
+                        { message.role === 'user'
+                            ? <FiEdit />
+                            : <FiRefreshCcw /> }
+                    </button>
+
                 </span>
             </div>
             { props.inds.length === 0

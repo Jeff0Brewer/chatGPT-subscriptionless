@@ -18,6 +18,9 @@ html, body {
 }
 
 textarea {
+    color: inherit;
     font: inherit;
+    background-color: transparent;
+    border: none;
     resize: none;
 }
