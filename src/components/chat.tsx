@@ -25,8 +25,36 @@ const Chat: FC = () => {
             const { message } = await res.json()
             throw new Error(`Completion error: ${message}`)
         }
-        const { content } = await res.json()
-        setMessages([...messages, { role: 'assistant', content }])
+        const reader = await res.body?.getReader()
+        if (!reader) {
+            throw new Error('Invalid stream reader from endpoint')
+        }
+        // explicit any type since ReadableStreamReadResult interface is private :)
+        let content = ''
+        const readStream = ({ done, value }: any): Promise<void> | void => {
+            if (done) {
+                console.log('stream end')
+                return
+            }
+            const lines = Buffer.from(value)
+                .toString()
+                .split('\n')
+                .filter(line => line.trim() !== '')
+            for (const line of lines) {
+                const response = line.replace(/^data: /, '')
+                if (response === '[DONE]') {
+                    return
+                } else {
+                    const token = JSON.parse(response)?.choices?.[0]?.delta?.content
+                    if (token) {
+                        content += token
+                        setMessages([...messages, { role: 'assistant', content }])
+                    }
+                }
+            }
+            return reader.read().then(readStream)
+        }
+        await reader.read().then(readStream)
     }
 
     // add message to curr list

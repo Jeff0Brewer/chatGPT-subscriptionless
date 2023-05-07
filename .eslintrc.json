@@ -21,7 +21,8 @@
     "rules": {
         "react/prop-types": "off",
         "indent": ["error", 4, { "SwitchCase": 1 }],
-        "@typescript-eslint/explicit-function-return-type": "error"
+        "@typescript-eslint/explicit-function-return-type": "error",
+        "@typescript-eslint/no-explicit-any": "off"
     },
     "settings": {
         "react": {
