@@ -2,6 +2,7 @@ import React, { FC, useState, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 import { FiEdit, FiRefreshCcw } from 'react-icons/fi'
+import type { ChatCompletionRequestMessage as Message } from 'openai'
 import type { TreeNode } from '@/lib/message-tree'
 import { impl as tr } from '@/lib/message-tree'
 import { resizeToFit } from '@/lib/textarea'
@@ -12,7 +13,8 @@ import styles from '@/styles/MessageList.module.css'
 type MessageListProps = {
     model: string,
     tree: TreeNode,
-    inds: Array<number>
+    inds: Array<number>,
+    addVariant: (message: Message, inds: Array<number>) => void
 }
 
 const MessageList: FC<MessageListProps> = props => {
@@ -20,7 +22,12 @@ const MessageList: FC<MessageListProps> = props => {
         <section className={styles.list}>
             <p className={styles.modelLabel}>Model: {props.model}</p>
             <div>
-                <MessageDisplay node={props.tree} inds={props.inds} />
+                <MessageDisplay
+                    node={props.tree}
+                    inds={props.inds}
+                    currInd={0}
+                    addVariant={props.addVariant}
+                />
             </div>
         </section>
     )
@@ -28,7 +35,9 @@ const MessageList: FC<MessageListProps> = props => {
 
 type MessageDisplayProps = {
     node: TreeNode,
-    inds: Array<number>
+    inds: Array<number>,
+    currInd: number,
+    addVariant: (message: Message, inds: Array<number>) => void
 }
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
@@ -52,6 +61,7 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
     const saveEdit = (): void => {
         if (!inputRef.current) { return }
         const content = inputRef.current.value
+        props.addVariant({ role: 'user', content }, props.inds.slice(0, props.currInd - 1))
         setEditing(false)
     }
 
@@ -100,9 +110,13 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
 
                 </span>
             </div>
-            { props.inds.length === 0
-                ? <></>
-                : <MessageDisplay node={props.node.nexts[props.inds[0]]} inds={props.inds.slice(1)} /> }
+            { props.currInd < props.inds.length
+                ? <MessageDisplay
+                    node={props.node.nexts[props.inds[props.currInd]]}
+                    inds={props.inds}
+                    currInd={props.currInd + 1}
+                    addVariant={props.addVariant} />
+                : <></> }
         </>
     )
 }

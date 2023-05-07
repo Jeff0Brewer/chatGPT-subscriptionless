@@ -72,7 +72,7 @@ const Chat: FC = () => {
     }
 
     // add message to curr list
-    const addUserMessage = (message: Message): void => {
+    const addMessage = (message: Message): void => {
         if (!tree) {
             // create new tree if no current messages
             setTree(tr.new(message))
@@ -86,13 +86,20 @@ const Chat: FC = () => {
         }
     }
 
+    const addVariant = (message: Message, inds: Array<number>): void => {
+        if (!tree) { return }
+        const ind = tr.addMessage(tree, inds, message)
+        setTree({ ...tree })
+        setInds([...inds, ind])
+    }
+
     return (
         <main className={styles.chat}>
             { tree
-                ? <MessageList model={model} tree={tree} inds={inds} />
+                ? <MessageList model={model} tree={tree} inds={inds} addVariant={addVariant} />
                 : <ModelDropdown model={model} setModel={setModel} /> }
             <div className={styles.bottom}>
-                <MessageInput addMessage={addUserMessage} />
+                <MessageInput addMessage={addMessage} />
                 <p className={styles.footer}>
                     ChatGPT may produce inaccurate information about people, places, or facts.
                 </p>

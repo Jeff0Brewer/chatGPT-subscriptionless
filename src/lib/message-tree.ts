@@ -34,7 +34,6 @@ const impl = {
         const node = impl.getNode(head, inds)
         const newInd = node.nexts.length
         node.nexts.push(impl.new(message))
-        // return index of new node
         return newInd
     },
     setContent: (head: TreeNode, inds: Array<number>, content: string): void => {
