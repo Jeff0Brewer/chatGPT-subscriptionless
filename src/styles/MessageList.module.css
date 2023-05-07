@@ -12,15 +12,22 @@
     padding-bottom: 200px;
 }
 
-.messageDisplay[data-role="assistant"] {
+.display[data-role="assistant"] {
     background-color: #444654;
 }
 
-.messageDisplay[data-role="user"] {
+.display[data-role="user"] {
     background-color: #343540;
 }
 
+.display button {
+    background-color: transparent;
+    border: none;
+    color: #acacbe;
+}
+
 .inner {
+    position: relative;
     display: flex;
     max-width: 700px;
     margin: auto;
@@ -31,6 +38,35 @@
     width: 30px;
     height: 30px;
     border-radius: 3px;
+}
+
+
+.edit {
+    display: none;
+    place-content: center;
+    position: absolute;
+    padding-top: inherit;
+    top: 0;
+    right: -20px;
+}
+
+.display[data-role = "user"]:hover .edit {
+    display: block;
+}
+
+.edit * {
+    width: 22px;
+    height: 22px;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+.edit:hover {
+    color: #fffc;
+}
+
+.edit:hover * {
+    background-color: #fff1;
 }
 
 .content {
@@ -46,4 +82,5 @@
     margin: 20px;
     border-radius: 5px;
     background-color: #000;
+    overflow-x: scroll;
 }
