@@ -52,6 +52,7 @@ const Chat: FC = () => {
                     const token = JSON.parse(response)?.choices?.[0]?.delta?.content
                     if (token) {
                         content += token
+                        // set messages directly for updates while streaming content
                         setMessages([...messages, { role: 'assistant', content }])
                     }
                 }
@@ -59,6 +60,7 @@ const Chat: FC = () => {
             return reader.read().then(readStream)
         }
         await reader.read().then(readStream)
+        // add completed message to tree once streaming finished
         addNewMessage({ role: 'assistant', content })
     }
 

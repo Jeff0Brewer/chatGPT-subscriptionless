@@ -70,7 +70,7 @@ const getCurrList = (self: MessageTree): Array<Message> => {
     return list
 }
 
-const addMessage = (self: MessageTree, message: Message) => {
+const addMessage = (self: MessageTree, message: Message): void => {
     const last = currVariant(self.tail)
     if (last) {
         const newVariants = newMessageVariants()
