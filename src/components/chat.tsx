@@ -4,7 +4,7 @@ import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
 import MessageList from '@/components/message-list'
 import type { TreeNode } from '@/lib/message-tree'
-import { treeImpl as tr } from '@/lib/message-tree'
+import { impl as tr } from '@/lib/message-tree'
 import { jsonPostBody } from '@/lib/fetch'
 import styles from '@/styles/Chat.module.css'
 
@@ -12,24 +12,24 @@ const DEFAULT_MODEL = 'GPT-3.5-turbo'
 
 const Chat: FC = () => {
     const [model, setModel] = useState<string>(DEFAULT_MODEL)
-    const [messages, setMessages] = useState<Array<Message>>([])
     const [tree, setTree] = useState<TreeNode | null>(null)
     const [inds, setInds] = useState<Array<number>>([])
 
     useEffect(() => {
-        console.log(tree)
         if (!tree) { return }
-        setMessages(tr.getList(tree, inds))
-    }, [tree])
-
-    useEffect(() => {
-        if (messages.length && messages[messages.length - 1].role === 'user') {
+        // get chat completion if user sent last message
+        const lastRole = tr.getNode(tree, inds).message.role
+        if (lastRole === 'user') {
             getCompletion()
         }
-    }, [messages])
+    }, [tree])
 
     // complete current message list, append new message
     const getCompletion = async (): Promise<void> => {
+        if (!tree) { return }
+
+        // get completion stream from endpoint using current message tree
+        const messages = tr.getList(tree, inds)
         const res = await fetch('/api/complete', jsonPostBody({ model, messages }))
         if (!res.ok) {
             const { message } = await res.json()
@@ -39,7 +39,13 @@ const Chat: FC = () => {
         if (!reader) {
             throw new Error('Invalid stream reader from endpoint')
         }
+
+        // add new empty message to tree, fill in content as its streamed
         let content = ''
+        const newInd = tr.addMessage(tree, inds, { role: 'assistant', content })
+        const nodeInd = [...inds, newInd]
+        setInds(nodeInd)
+
         // explicit any type since ReadableStreamReadResult interface is private :)
         const readStream = ({ done, value }: any): Promise<void> | void => {
             if (done) { return }
@@ -55,37 +61,38 @@ const Chat: FC = () => {
                     const token = JSON.parse(response)?.choices?.[0]?.delta?.content
                     if (token) {
                         content += token
-                        // set messages directly for updates while streaming content
-                        setMessages([...messages, { role: 'assistant', content }])
+                        tr.setContent(tree, nodeInd, content)
+                        setTree({ ...tree })
                     }
                 }
             }
             return reader.read().then(readStream)
         }
         await reader.read().then(readStream)
-        // add completed message to tree once streaming finished
-        addNewMessage({ role: 'assistant', content })
     }
 
     // add message to curr list
-    const addNewMessage = (msg: Message): void => {
+    const addUserMessage = (message: Message): void => {
         if (!tree) {
-            setTree(tr.new(msg))
+            // create new tree if no current messages
+            setTree(tr.new(message))
             setInds([])
         } else {
-            const ind = tr.addMessage(tree, inds, msg)
-            setInds([...inds, ind])
+            // add message as child of current message
+            const ind = tr.addMessage(tree, inds, message)
             setTree({ ...tree })
+            // update indices with index of new message
+            setInds([...inds, ind])
         }
     }
 
     return (
         <main className={styles.chat}>
-            { messages.length === 0
-                ? <ModelDropdown model={model} setModel={setModel} />
-                : <MessageList model={model} messages={messages} /> }
+            { tree
+                ? <MessageList model={model} tree={tree} inds={inds} />
+                : <ModelDropdown model={model} setModel={setModel} /> }
             <div className={styles.bottom}>
-                <MessageInput addMessage={addNewMessage} />
+                <MessageInput addMessage={addUserMessage} />
                 <p className={styles.footer}>
                     ChatGPT may produce inaccurate information about people, places, or facts.
                 </p>

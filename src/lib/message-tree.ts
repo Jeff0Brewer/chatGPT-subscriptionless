@@ -5,22 +5,12 @@ type TreeNode = {
     nexts: Array<TreeNode>
 }
 
-const treeImpl = {
+const impl = {
     new: (message: Message): TreeNode => {
         return {
             message,
             nexts: []
         }
-    },
-    addMessage: (head: TreeNode, inds: Array<number>, message: Message): number => {
-        let curr = head
-        for (let i = 0; i < inds.length; i++) {
-            curr = curr.nexts[inds[i]]
-        }
-        const newInd = curr.nexts.length
-        curr.nexts.push(treeImpl.new(message))
-        // return index of new node
-        return newInd
     },
     getList: (head: TreeNode, inds: Array<number>): Array<Message> => {
         const messages = []
@@ -32,6 +22,24 @@ const treeImpl = {
             i++
         }
         return messages
+    },
+    getNode: (head: TreeNode, inds: Array<number>): TreeNode => {
+        let curr = head
+        for (let i = 0; i < inds.length; i++) {
+            curr = curr.nexts[inds[i]]
+        }
+        return curr
+    },
+    addMessage: (head: TreeNode, inds: Array<number>, message: Message): number => {
+        const node = impl.getNode(head, inds)
+        const newInd = node.nexts.length
+        node.nexts.push(impl.new(message))
+        // return index of new node
+        return newInd
+    },
+    setContent: (head: TreeNode, inds: Array<number>, content: string): void => {
+        const node = impl.getNode(head, inds)
+        node.message.content = content
     }
 }
 
@@ -40,5 +48,5 @@ export type {
 }
 
 export {
-    treeImpl
+    impl
 }
