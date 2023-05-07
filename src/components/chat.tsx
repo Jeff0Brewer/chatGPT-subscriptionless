@@ -3,8 +3,8 @@ import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
 import MessageList from '@/components/message-list'
-import type { MessageTree } from '@/lib/message-tree'
-import { newMessageTree, getCurrList, addMessage } from '@/lib/message-tree'
+import type { TreeNode } from '@/lib/message-tree'
+import { treeImpl as tr } from '@/lib/message-tree'
 import { jsonPostBody } from '@/lib/fetch'
 import styles from '@/styles/Chat.module.css'
 
@@ -13,10 +13,13 @@ const DEFAULT_MODEL = 'GPT-3.5-turbo'
 const Chat: FC = () => {
     const [model, setModel] = useState<string>(DEFAULT_MODEL)
     const [messages, setMessages] = useState<Array<Message>>([])
-    const [tree, setTree] = useState<MessageTree>(newMessageTree())
+    const [tree, setTree] = useState<TreeNode | null>(null)
+    const [inds, setInds] = useState<Array<number>>([])
 
     useEffect(() => {
-        setMessages(getCurrList(tree))
+        console.log(tree)
+        if (!tree) { return }
+        setMessages(tr.getList(tree, inds))
     }, [tree])
 
     useEffect(() => {
@@ -66,8 +69,14 @@ const Chat: FC = () => {
 
     // add message to curr list
     const addNewMessage = (msg: Message): void => {
-        addMessage(tree, msg)
-        setTree({ ...tree })
+        if (!tree) {
+            setTree(tr.new(msg))
+            setInds([])
+        } else {
+            const ind = tr.addMessage(tree, inds, msg)
+            setInds([...inds, ind])
+            setTree({ ...tree })
+        }
     }
 
     return (
