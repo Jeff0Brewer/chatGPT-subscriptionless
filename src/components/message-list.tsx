@@ -14,7 +14,8 @@ type MessageListProps = {
     model: string,
     tree: TreeNode,
     inds: Array<number>,
-    addVariant: (message: Message, inds: Array<number>) => void
+    addVariant: (message: Message, inds: Array<number>) => void,
+    changeVariant: (inds: Array<number>, delta: number) => void
 }
 
 const MessageList: FC<MessageListProps> = props => {
@@ -28,6 +29,7 @@ const MessageList: FC<MessageListProps> = props => {
                     currInd={0}
                     numVariant={0}
                     addVariant={props.addVariant}
+                    changeVariant={props.changeVariant}
                 />
             </div>
         </section>
@@ -39,7 +41,8 @@ type MessageDisplayProps = {
     inds: Array<number>,
     currInd: number,
     numVariant: number,
-    addVariant: (message: Message, inds: Array<number>) => void
+    addVariant: (message: Message, inds: Array<number>) => void,
+    changeVariant: (inds: Array<number>, delta: number) => void
 }
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
@@ -65,6 +68,14 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
         const content = inputRef.current.value
         props.addVariant({ role: 'user', content }, props.inds.slice(0, props.currInd - 1))
         setEditing(false)
+    }
+
+    const incVariant = (): void => {
+        props.changeVariant(props.inds.slice(0, props.currInd), 1)
+    }
+
+    const decVariant = (): void => {
+        props.changeVariant(props.inds.slice(0, props.currInd), 1)
     }
 
     const cancelEdit = (): void => {
@@ -111,9 +122,9 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                     </button>
                     { props.numVariant > 1
                         ? <div className={styles.variantSelect}>
-                            <button><FiChevronLeft /></button>
+                            <button onClick={decVariant}><FiChevronLeft /></button>
                             <p>{`${props.inds[props.currInd - 1] + 1} / ${props.numVariant}`}</p>
-                            <button><FiChevronRight /></button>
+                            <button onClick={incVariant}><FiChevronRight /></button>
                         </div>
                         : <></>}
                 </span>
@@ -124,7 +135,9 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                     inds={props.inds}
                     currInd={props.currInd + 1}
                     numVariant={props.node.nexts.length}
-                    addVariant={props.addVariant} />
+                    addVariant={props.addVariant}
+                    changeVariant={props.changeVariant}
+                />
                 : <></> }
         </>
     )

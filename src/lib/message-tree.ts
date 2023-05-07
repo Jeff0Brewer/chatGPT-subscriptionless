@@ -39,6 +39,18 @@ const impl = {
     setContent: (head: TreeNode, inds: Array<number>, content: string): void => {
         const node = impl.getNode(head, inds)
         node.message.content = content
+    },
+    changeVariant: (head: TreeNode, inds: Array<number>, delta: number): Array<number> => {
+        const newInds = inds.slice(0, -1)
+        const parent = impl.getNode(head, newInds)
+        const newInd = (inds[inds.length - 1] + delta) % parent.nexts.length
+        newInds.push(newInd)
+        let curr = parent.nexts[newInd]
+        while (curr.nexts.length > 0) {
+            newInds.push(0)
+            curr = curr.nexts[0]
+        }
+        return newInds
     }
 }
 

@@ -93,10 +93,22 @@ const Chat: FC = () => {
         setInds([...inds, ind])
     }
 
+    const changeVariant = (inds: Array<number>, delta: number): void => {
+        if (!tree) { return }
+        const newInds = tr.changeVariant(tree, inds, delta)
+        setInds(newInds)
+    }
+
     return (
         <main className={styles.chat}>
             { tree
-                ? <MessageList model={model} tree={tree} inds={inds} addVariant={addVariant} />
+                ? <MessageList
+                    model={model}
+                    tree={tree}
+                    inds={inds}
+                    addVariant={addVariant}
+                    changeVariant={changeVariant}
+                />
                 : <ModelDropdown model={model} setModel={setModel} /> }
             <div className={styles.bottom}>
                 <MessageInput addMessage={addMessage} />
