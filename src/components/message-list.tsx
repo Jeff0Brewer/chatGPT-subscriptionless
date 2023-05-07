@@ -1,7 +1,7 @@
 import React, { FC, useState, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
-import { FiEdit, FiRefreshCcw } from 'react-icons/fi'
+import { FiEdit, FiRefreshCcw, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import type { TreeNode } from '@/lib/message-tree'
 import { impl as tr } from '@/lib/message-tree'
@@ -26,6 +26,7 @@ const MessageList: FC<MessageListProps> = props => {
                     node={props.tree}
                     inds={props.inds}
                     currInd={0}
+                    numVariant={0}
                     addVariant={props.addVariant}
                 />
             </div>
@@ -37,6 +38,7 @@ type MessageDisplayProps = {
     node: TreeNode,
     inds: Array<number>,
     currInd: number,
+    numVariant: number,
     addVariant: (message: Message, inds: Array<number>) => void
 }
 
@@ -107,7 +109,13 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                             ? <FiEdit />
                             : <FiRefreshCcw /> }
                     </button>
-
+                    { props.numVariant > 1
+                        ? <div className={styles.variantSelect}>
+                            <button><FiChevronLeft /></button>
+                            <p>{`${props.inds[props.currInd - 1] + 1} / ${props.numVariant}`}</p>
+                            <button><FiChevronRight /></button>
+                        </div>
+                        : <></>}
                 </span>
             </div>
             { props.currInd < props.inds.length
@@ -115,6 +123,7 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                     node={props.node.nexts[props.inds[props.currInd]]}
                     inds={props.inds}
                     currInd={props.currInd + 1}
+                    numVariant={props.node.nexts.length}
                     addVariant={props.addVariant} />
                 : <></> }
         </>

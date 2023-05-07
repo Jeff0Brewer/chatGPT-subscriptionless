@@ -120,3 +120,24 @@
     display: flex;
     justify-content: center;
 }
+
+.variantSelect {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    color: #fff;
+    font-size: 12px;
+    padding-top: inherit;
+    position: absolute;
+    top: 0;
+    left: -60px;
+}
+
+.variantSelect button {
+    background-color: transparent;
+    border: none;
+    display: grid;
+    place-content: center;
+    color: inherit;
+    font: inherit;
+}
