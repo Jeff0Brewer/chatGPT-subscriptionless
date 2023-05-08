@@ -97,8 +97,8 @@ const Chat: FC = () => {
 
     const changeVariant = (nodeInd: Array<number>, delta: number): void => {
         if (!tree) { return }
-        const { inds: newInds, lastNode } = tr.changeVariant(tree, nodeInd, delta)
-        setInds(newInds)
+        const { inds, lastNode } = tr.changeVariant(tree, nodeInd, delta)
+        setInds(inds)
         setLastNode(lastNode)
     }
 
