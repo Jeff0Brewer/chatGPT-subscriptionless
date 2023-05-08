@@ -15,7 +15,11 @@ const newNode = (message: Message, prev: TreeNode | null): TreeNode => {
 const getList = (head: TreeNode, inds: Array<number>): Array<Message> => {
     const messages = []
     let curr = head
-    messages.push(curr.message)
+    // exclude empty first message
+    // enabling first node variants and custom sys message
+    if (curr.message.content) {
+        messages.push(curr.message)
+    }
     for (let i = 0; i < inds.length; i++) {
         curr = curr.nexts[inds[i]]
         if (!curr) {

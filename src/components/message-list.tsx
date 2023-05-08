@@ -33,34 +33,33 @@ type MessageDisplayProps = {
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
     const { inds } = useListContext()
-    return (
-        <>
-            <div className={styles.display} data-role={props.node.message.role}>
-                <span className={styles.inner}>
-                    <Image
-                        className={styles.icon}
-                        width={40}
-                        height={40}
-                        src={props.node.message.role === 'user' ? userIcon.src : gptIcon.src}
-                        alt={props.node.message.role}
-                    />
-                    { props.node.message.role === 'user'
-                        ? <UserMessageDisplay node={props.node} currInd={props.currInd} />
-                        : <ReactMarkdown className={styles.content}>
-                            {props.node.message.content}
-                        </ReactMarkdown> }
-                    <VariantSelector currInd={props.currInd} numVariant={props.numVariant} />
-                </span>
-            </div>
-            {/* append next in tree recursively to display full list */}
-            { props.currInd < inds.length &&
+    return <>
+        { props.node.message.role !== 'system' &&
+        <div className={styles.display} data-role={props.node.message.role}>
+            <span className={styles.inner}>
+                <Image
+                    className={styles.icon}
+                    width={40}
+                    height={40}
+                    src={props.node.message.role === 'user' ? userIcon.src : gptIcon.src}
+                    alt={props.node.message.role}
+                />
+                { props.node.message.role === 'user'
+                    ? <UserMessageDisplay node={props.node} currInd={props.currInd} />
+                    : <ReactMarkdown className={styles.content}>
+                        {props.node.message.content}
+                    </ReactMarkdown> }
+                <VariantSelector currInd={props.currInd} numVariant={props.numVariant} />
+            </span>
+        </div> }
+        {/* append next in tree recursively to display full list */}
+        { props.currInd < inds.length &&
                 <MessageDisplay
                     node={props.node.nexts[inds[props.currInd]]}
                     currInd={props.currInd + 1}
                     numVariant={props.node.nexts.length}
                 /> }
-        </>
-    )
+    </>
 }
 
 type VariantSelectorProps = {

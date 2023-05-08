@@ -13,21 +13,19 @@ const DEFAULT_MODEL = 'GPT-3.5-turbo'
 
 const Chat: FC = () => {
     const [model, setModel] = useState<string>(DEFAULT_MODEL)
-    const [tree, setTree] = useState<TreeNode | null>(null)
+    const [tree, setTree] = useState<TreeNode>(tr.newNode({ role: 'system', content: '' }, null))
     const [inds, setInds] = useState<Array<number>>([])
-    const [lastNode, setLastNode] = useState<TreeNode | null>(null)
+    const [lastNode, setLastNode] = useState<TreeNode>(tree)
 
     useEffect(() => {
         // get chat completion if user sent last message
-        if (tree && lastNode && lastNode.message.role === 'user') {
+        if (lastNode.message.role === 'user') {
             getCompletion()
         }
     }, [tree])
 
     // complete current message list, append new message
     const getCompletion = async (): Promise<void> => {
-        if (!tree || !lastNode) { return }
-
         // get completion stream from endpoint using current message tree
         const messages = tr.getList(tree, inds)
         const res = await fetch('/api/complete', jsonPostBody({ model, messages }))
@@ -71,24 +69,15 @@ const Chat: FC = () => {
 
     // add message to curr list
     const addMessage = (message: Message): void => {
-        if (!tree || !lastNode) {
-            // create new tree if no current messages
-            const node = tr.newNode(message, null)
-            setTree(node)
-            setLastNode(node)
-            setInds([])
-        } else {
-            // add message as child of current message
-            const { ind, node } = tr.addChild(lastNode, message)
-            setTree({ ...tree })
-            setLastNode(node)
-            // update indices with index of new message
-            setInds([...inds, ind])
-        }
+        // add message as child of current message
+        const { ind, node } = tr.addChild(lastNode, message)
+        setTree({ ...tree })
+        setLastNode(node)
+        // update indices with index of new message
+        setInds([...inds, ind])
     }
 
     const addVariant = (node: TreeNode, nodeInd: Array<number>, message: Message): void => {
-        if (!tree) { return }
         const { ind, node: variant } = tr.addSibling(node, message)
         setTree({ ...tree })
         setInds([...nodeInd.slice(0, -1), ind])
@@ -96,7 +85,6 @@ const Chat: FC = () => {
     }
 
     const changeVariant = (nodeInd: Array<number>, delta: number): void => {
-        if (!tree) { return }
         const { inds, lastNode } = tr.changeVariant(tree, nodeInd, delta)
         setInds(inds)
         setLastNode(lastNode)
@@ -104,7 +92,7 @@ const Chat: FC = () => {
 
     return (
         <main className={styles.chat}>
-            { tree
+            { lastNode.message.role !== 'system'
                 ? <ListContext.Provider value={{ inds, addVariant, changeVariant }}>
                     <MessageList model={model} tree={tree} />
                 </ListContext.Provider>
