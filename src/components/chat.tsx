@@ -4,7 +4,7 @@ import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
 import MessageList from '@/components/message-list'
 import type { TreeNode } from '@/lib/message-tree'
-import { impl as tr } from '@/lib/message-tree'
+import * as tr from '@/lib/message-tree'
 import { jsonPostBody } from '@/lib/fetch'
 import styles from '@/styles/Chat.module.css'
 
@@ -72,7 +72,7 @@ const Chat: FC = () => {
     const addMessage = (message: Message): void => {
         if (!tree || !lastNode) {
             // create new tree if no current messages
-            const node = tr.new(message, null)
+            const node = tr.newNode(message, null)
             setTree(node)
             setLastNode(node)
             setInds([])
