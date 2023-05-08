@@ -55,10 +55,14 @@ const Chat: FC = () => {
                 if (response === '[DONE]') {
                     return
                 } else {
-                    const token = JSON.parse(response)?.choices?.[0]?.delta?.content
-                    if (token) {
-                        node.message.content += token
-                        setTree({ ...tree })
+                    try {
+                        const token = JSON.parse(response)?.choices?.[0]?.delta?.content
+                        if (token) {
+                            node.message.content += token
+                            setTree({ ...tree })
+                        }
+                    } catch {
+                        console.log(`JSON parse error for: ${response}`)
                     }
                 }
             }
