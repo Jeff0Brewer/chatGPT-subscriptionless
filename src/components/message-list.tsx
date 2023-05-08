@@ -32,10 +32,7 @@ type MessageDisplayProps = {
 }
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
-    const { inds } = useContext(ListContext)
-    if (!inds) {
-        throw new Error('ListContext uninitialized')
-    }
+    const { inds } = useListContext()
     const message = props.node.message
 
     return (
@@ -72,10 +69,7 @@ type VariantSelectorProps = {
 }
 
 const VariantSelector: FC<VariantSelectorProps> = props => {
-    const { inds, changeVariant } = useContext(ListContext)
-    if (!inds || !changeVariant) {
-        throw new Error('ListContext uninitialized')
-    }
+    const { inds, changeVariant } = useListContext()
 
     const incVariant = (): void => {
         changeVariant(inds.slice(0, props.currInd), 1)
@@ -104,10 +98,7 @@ type UserMessageDisplayProps = {
 const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
     const [editing, setEditing] = useState<boolean>(false)
     const inputRef = useRef<HTMLTextAreaElement>(null)
-    const { inds, addVariant } = useContext(ListContext)
-    if (!inds || !addVariant) {
-        throw new Error('ListContext uninitialized')
-    }
+    const { inds, addVariant } = useListContext()
 
     const resizeInput = (): void => {
         if (!inputRef.current) { return }
@@ -153,7 +144,15 @@ type ListContextValues = {
     changeVariant: (nodeInd: Array<number>, delta: number) => void
 }
 
-const ListContext = createContext<Partial<ListContextValues>>({})
+const ListContext = createContext<ListContextValues | null>(null)
+
+const useListContext = (): ListContextValues => {
+    const values = useContext(ListContext)
+    if (!values) {
+        throw new Error('ListContext uninitialized')
+    }
+    return values
+}
 
 export default MessageList
 
