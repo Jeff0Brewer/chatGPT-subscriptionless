@@ -1,9 +1,9 @@
-import React, { FC, useState, useRef, createContext, useContext } from 'react'
+import React, { FC, useState, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 import { FiEdit, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
-import type { ChatCompletionRequestMessage as Message } from 'openai'
 import type { TreeNode } from '@/lib/message-tree'
+import { useListContext } from '@/lib/list-context'
 import { resizeToFit } from '@/lib/textarea'
 import userIcon from '@/icons/user-icon.jpg'
 import gptIcon from '@/icons/gpt-icon.jpg'
@@ -138,24 +138,4 @@ const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
     </>
 }
 
-type ListContextValues = {
-    inds: Array<number>,
-    addVariant: (node: TreeNode, nodeInd: Array<number>, message: Message) => void,
-    changeVariant: (nodeInd: Array<number>, delta: number) => void
-}
-
-const ListContext = createContext<ListContextValues | null>(null)
-
-const useListContext = (): ListContextValues => {
-    const values = useContext(ListContext)
-    if (!values) {
-        throw new Error('ListContext uninitialized')
-    }
-    return values
-}
-
 export default MessageList
-
-export {
-    ListContext
-}
