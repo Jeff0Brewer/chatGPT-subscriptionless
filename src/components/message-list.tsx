@@ -4,7 +4,6 @@ import Image from 'next/image'
 import { FiEdit, FiRefreshCcw, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import type { TreeNode } from '@/lib/message-tree'
-import { impl as tr } from '@/lib/message-tree'
 import { resizeToFit } from '@/lib/textarea'
 import userIcon from '@/icons/user-icon.jpg'
 import gptIcon from '@/icons/gpt-icon.jpg'
@@ -14,8 +13,8 @@ type MessageListProps = {
     model: string,
     tree: TreeNode,
     inds: Array<number>,
-    addVariant: (message: Message, inds: Array<number>) => void,
-    changeVariant: (inds: Array<number>, delta: number) => void
+    addVariant: (node: TreeNode, nodeInd: Array<number>, message: Message) => void,
+    changeVariant: (nodeInd: Array<number>, delta: number) => void
 }
 
 const MessageList: FC<MessageListProps> = props => {
@@ -41,8 +40,8 @@ type MessageDisplayProps = {
     inds: Array<number>,
     currInd: number,
     numVariant: number,
-    addVariant: (message: Message, inds: Array<number>) => void,
-    changeVariant: (inds: Array<number>, delta: number) => void
+    addVariant: (node: TreeNode, nodeInd: Array<number>, message: Message) => void,
+    changeVariant: (nodeInd: Array<number>, delta: number) => void
 }
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
@@ -66,7 +65,7 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
     const saveEdit = (): void => {
         if (!inputRef.current) { return }
         const content = inputRef.current.value
-        props.addVariant({ role: 'user', content }, props.inds.slice(0, props.currInd - 1))
+        props.addVariant(props.node, props.inds.slice(0, props.currInd), { role: 'user', content })
         setEditing(false)
     }
 
@@ -75,7 +74,7 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
     }
 
     const decVariant = (): void => {
-        props.changeVariant(props.inds.slice(0, props.currInd), 1)
+        props.changeVariant(props.inds.slice(0, props.currInd), -1)
     }
 
     const cancelEdit = (): void => {

@@ -1,14 +1,16 @@
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 
 type TreeNode = {
-    message: Message
+    message: Message,
+    prev: TreeNode | null,
     nexts: Array<TreeNode>
 }
 
 const impl = {
-    new: (message: Message): TreeNode => {
+    new: (message: Message, prev: TreeNode | null): TreeNode => {
         return {
             message,
+            prev,
             nexts: []
         }
     },
@@ -23,30 +25,36 @@ const impl = {
         }
         return messages
     },
-    getNode: (head: TreeNode, inds: Array<number>): TreeNode => {
-        let curr = head
-        for (let i = 0; i < inds.length; i++) {
-            curr = curr.nexts[inds[i]]
+    addChild: (parent: TreeNode, message: Message): { ind: number, node: TreeNode } => {
+        const ind = parent.nexts.length
+        const node = impl.new(message, parent)
+        parent.nexts.push(node)
+        return { ind, node }
+    },
+    addSibling: (node: TreeNode, message: Message): {ind: number, node: TreeNode} => {
+        const parent = node.prev
+        if (!parent) {
+            throw new Error('Cannot add sibling to node with no parent')
         }
-        return curr
+        return impl.addChild(parent, message)
     },
-    addMessage: (head: TreeNode, inds: Array<number>, message: Message): number => {
-        const node = impl.getNode(head, inds)
-        const newInd = node.nexts.length
-        node.nexts.push(impl.new(message))
-        return newInd
-    },
-    changeVariant: (head: TreeNode, inds: Array<number>, delta: number): Array<number> => {
-        const newInds = inds.slice(0, -1)
-        const parent = impl.getNode(head, newInds)
-        const newInd = (inds[inds.length - 1] + delta) % parent.nexts.length
-        newInds.push(newInd)
-        let curr = parent.nexts[newInd]
+    changeVariant: (head: TreeNode, nodeInd: Array<number>, delta: number): {inds: Array<number>, lastNode: TreeNode} => {
+        let curr = head
+        // traverse to node's parent
+        for (let i = 0; i < nodeInd.length - 1; i++) {
+            curr = curr.nexts[nodeInd[i]]
+        }
+        // get index of new variant
+        const newInd = (nodeInd[nodeInd.length - 1] + delta + curr.nexts.length) % curr.nexts.length
+        const inds = [...nodeInd]
+        inds[inds.length - 1] = newInd
+        // traverse to end of tree always choosing first variant
+        curr = curr.nexts[newInd]
         while (curr.nexts.length > 0) {
-            newInds.push(0)
+            inds.push(0)
             curr = curr.nexts[0]
         }
-        return newInds
+        return { inds, lastNode: curr }
     }
 }
 

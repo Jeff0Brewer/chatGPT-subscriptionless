@@ -14,18 +14,18 @@ const Chat: FC = () => {
     const [model, setModel] = useState<string>(DEFAULT_MODEL)
     const [tree, setTree] = useState<TreeNode | null>(null)
     const [inds, setInds] = useState<Array<number>>([])
-    const [lastMessage, setLastMessage] = useState<Message | null>(null)
+    const [lastNode, setLastNode] = useState<TreeNode | null>(null)
 
     useEffect(() => {
         // get chat completion if user sent last message
-        if (tree && lastMessage && lastMessage.role === 'user') {
+        if (tree && lastNode && lastNode.message.role === 'user') {
             getCompletion()
         }
-    }, [tree]) // tree as dependency to get completion on tree update
+    }, [tree])
 
     // complete current message list, append new message
     const getCompletion = async (): Promise<void> => {
-        if (!tree) { return }
+        if (!tree || !lastNode) { return }
 
         // get completion stream from endpoint using current message tree
         const messages = tr.getList(tree, inds)
@@ -40,11 +40,9 @@ const Chat: FC = () => {
         }
 
         // add new empty message to tree, fill in content as its streamed
-        const newMessage: Message = { role: 'assistant', content: '' }
-        const newInd = tr.addMessage(tree, inds, newMessage)
-        const nodeInd = [...inds, newInd]
-        setInds(nodeInd)
-        setLastMessage(newMessage)
+        const { ind, node } = tr.addChild(lastNode, { role: 'assistant', content: '' })
+        setInds([...inds, ind])
+        setLastNode(node)
 
         // explicit any type since ReadableStreamReadResult interface is private :)
         const readStream = ({ done, value }: any): Promise<void> | void => {
@@ -60,7 +58,7 @@ const Chat: FC = () => {
                 } else {
                     const token = JSON.parse(response)?.choices?.[0]?.delta?.content
                     if (token) {
-                        newMessage.content += token
+                        node.message.content += token
                         setTree({ ...tree })
                     }
                 }
@@ -72,34 +70,35 @@ const Chat: FC = () => {
 
     // add message to curr list
     const addMessage = (message: Message): void => {
-        if (!tree) {
+        if (!tree || !lastNode) {
             // create new tree if no current messages
-            setTree(tr.new(message))
+            const node = tr.new(message, null)
+            setTree(node)
+            setLastNode(node)
             setInds([])
         } else {
             // add message as child of current message
-            const ind = tr.addMessage(tree, inds, message)
+            const { ind, node } = tr.addChild(lastNode, message)
             setTree({ ...tree })
+            setLastNode(node)
             // update indices with index of new message
             setInds([...inds, ind])
         }
-        setLastMessage(message)
     }
 
-    const addVariant = (message: Message, inds: Array<number>): void => {
+    const addVariant = (node: TreeNode, nodeInd: Array<number>, message: Message): void => {
         if (!tree) { return }
-        const ind = tr.addMessage(tree, inds, message)
+        const { ind, node: variant } = tr.addSibling(node, message)
         setTree({ ...tree })
-        setInds([...inds, ind])
-        setLastMessage(message)
+        setInds([...nodeInd.slice(0, -1), ind])
+        setLastNode(variant)
     }
 
-    const changeVariant = (inds: Array<number>, delta: number): void => {
+    const changeVariant = (nodeInd: Array<number>, delta: number): void => {
         if (!tree) { return }
-        const newInds = tr.changeVariant(tree, inds, delta)
-        const newMsg = tr.getNode(tree, inds).message
+        const { inds: newInds, lastNode } = tr.changeVariant(tree, nodeInd, delta)
         setInds(newInds)
-        setLastMessage(newMsg)
+        setLastNode(lastNode)
     }
 
     return (
