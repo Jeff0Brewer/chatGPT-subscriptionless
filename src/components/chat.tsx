@@ -1,8 +1,5 @@
 import React, { FC, useState, useEffect } from 'react'
-import type {
-    ChatCompletionRequestMessage as Message,
-    ChatCompletionRequestMessageRoleEnum as Role
-} from 'openai'
+import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
 import MessageList from '@/components/message-list'
@@ -17,12 +14,11 @@ const Chat: FC = () => {
     const [model, setModel] = useState<string>(DEFAULT_MODEL)
     const [tree, setTree] = useState<TreeNode | null>(null)
     const [inds, setInds] = useState<Array<number>>([])
-    const [lastRole, setLastRole] = useState<Role | null>(null)
+    const [lastMessage, setLastMessage] = useState<Message | null>(null)
 
     useEffect(() => {
-        if (!tree) { return }
         // get chat completion if user sent last message
-        if (lastRole === 'user') {
+        if (tree && lastMessage && lastMessage.role === 'user') {
             getCompletion()
         }
     }, [tree]) // tree as dependency to get completion on tree update
@@ -48,7 +44,7 @@ const Chat: FC = () => {
         const newInd = tr.addMessage(tree, inds, newMessage)
         const nodeInd = [...inds, newInd]
         setInds(nodeInd)
-        setLastRole(newMessage.role)
+        setLastMessage(newMessage)
 
         // explicit any type since ReadableStreamReadResult interface is private :)
         const readStream = ({ done, value }: any): Promise<void> | void => {
@@ -87,7 +83,7 @@ const Chat: FC = () => {
             // update indices with index of new message
             setInds([...inds, ind])
         }
-        setLastRole(message.role)
+        setLastMessage(message)
     }
 
     const addVariant = (message: Message, inds: Array<number>): void => {
@@ -95,7 +91,7 @@ const Chat: FC = () => {
         const ind = tr.addMessage(tree, inds, message)
         setTree({ ...tree })
         setInds([...inds, ind])
-        setLastRole(message.role)
+        setLastMessage(message)
     }
 
     const changeVariant = (inds: Array<number>, delta: number): void => {
@@ -103,7 +99,7 @@ const Chat: FC = () => {
         const newInds = tr.changeVariant(tree, inds, delta)
         const newMsg = tr.getNode(tree, inds).message
         setInds(newInds)
-        setLastRole(newMsg.role)
+        setLastMessage(newMsg)
     }
 
     return (
