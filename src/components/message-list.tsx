@@ -99,11 +99,6 @@ const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
     const { inds, addVariant } = useListContext()
 
-    const resizeInput = (): void => {
-        if (!inputRef.current) { return }
-        resizeToFit(inputRef.current)
-    }
-
     const startEdit = (): void => { setEditing(true) }
 
     const cancelEdit = (): void => { setEditing(false) }
@@ -113,6 +108,11 @@ const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
         const content = inputRef.current.value
         addVariant(props.node, inds.slice(0, props.currInd), { role: 'user', content })
         setEditing(false)
+    }
+
+    const resizeInput = (): void => {
+        if (!inputRef.current) { return }
+        resizeToFit(inputRef.current)
     }
 
     return <>
