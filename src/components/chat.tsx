@@ -44,8 +44,7 @@ const Chat: FC = () => {
         }
 
         // add new empty message to tree, fill in content as its streamed
-        let content = ''
-        const newMessage: Message = { role: 'assistant', content }
+        const newMessage: Message = { role: 'assistant', content: '' }
         const newInd = tr.addMessage(tree, inds, newMessage)
         const nodeInd = [...inds, newInd]
         setInds(nodeInd)
@@ -65,8 +64,7 @@ const Chat: FC = () => {
                 } else {
                     const token = JSON.parse(response)?.choices?.[0]?.delta?.content
                     if (token) {
-                        content += token
-                        tr.setContent(tree, nodeInd, content)
+                        newMessage.content += token
                         setTree({ ...tree })
                     }
                 }

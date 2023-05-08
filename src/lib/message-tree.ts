@@ -36,10 +36,6 @@ const impl = {
         node.nexts.push(impl.new(message))
         return newInd
     },
-    setContent: (head: TreeNode, inds: Array<number>, content: string): void => {
-        const node = impl.getNode(head, inds)
-        node.message.content = content
-    },
     changeVariant: (head: TreeNode, inds: Array<number>, delta: number): Array<number> => {
         const newInds = inds.slice(0, -1)
         const parent = impl.getNode(head, newInds)
