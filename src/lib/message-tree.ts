@@ -15,9 +15,9 @@ const newNode = (message: Message, prev: TreeNode | null): TreeNode => {
 const getList = (head: TreeNode, inds: Array<number>): Array<Message> => {
     const messages = []
     let curr = head
-    // exclude empty first message
+    // exclude empty system message
     // enabling first node variants and custom sys message
-    if (curr.message.content) {
+    if (curr.message.role === 'system' && curr.message.content) {
         messages.push(curr.message)
     }
     for (let i = 0; i < inds.length; i++) {
