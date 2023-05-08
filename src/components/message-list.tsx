@@ -32,19 +32,11 @@ type MessageDisplayProps = {
 }
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
-    const { inds, addVariant, changeVariant } = useContext(ListContext)
-    if (!inds || !addVariant || !changeVariant) {
+    const { inds } = useContext(ListContext)
+    if (!inds) {
         throw new Error('ListContext uninitialized')
     }
     const message = props.node.message
-
-    const incVariant = (): void => {
-        changeVariant(inds.slice(0, props.currInd), 1)
-    }
-
-    const decVariant = (): void => {
-        changeVariant(inds.slice(0, props.currInd), -1)
-    }
 
     return (
         <>
@@ -60,12 +52,7 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                     { message.role === 'user'
                         ? <UserMessageDisplay node={props.node} currInd={props.currInd} />
                         : <ReactMarkdown className={styles.content}>{message.content}</ReactMarkdown> }
-                    { props.numVariant > 1 &&
-                         <div className={styles.variantSelect}>
-                             <button onClick={decVariant}><FiChevronLeft /></button>
-                             <p>{`${inds[props.currInd - 1] + 1} / ${props.numVariant}`}</p>
-                             <button onClick={incVariant}><FiChevronRight /></button>
-                         </div> }
+                    <VariantSelector currInd={props.currInd} numVariant={props.numVariant} />
                 </span>
             </div>
             { props.currInd < inds.length
@@ -77,6 +64,36 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                 : <></> }
         </>
     )
+}
+
+type VariantSelectorProps = {
+    currInd: number,
+    numVariant: number
+}
+
+const VariantSelector: FC<VariantSelectorProps> = props => {
+    const { inds, changeVariant } = useContext(ListContext)
+    if (!inds || !changeVariant) {
+        throw new Error('ListContext uninitialized')
+    }
+
+    const incVariant = (): void => {
+        changeVariant(inds.slice(0, props.currInd), 1)
+    }
+
+    const decVariant = (): void => {
+        changeVariant(inds.slice(0, props.currInd), -1)
+    }
+
+    return <>
+        { props.numVariant > 1
+            ? <div className={styles.variantSelect}>
+                <button onClick={decVariant}><FiChevronLeft /></button>
+                <p>{`${inds[props.currInd - 1] + 1} / ${props.numVariant}`}</p>
+                <button onClick={incVariant}><FiChevronRight /></button>
+            </div>
+            : <></> }
+    </>
 }
 
 type UserMessageDisplayProps = {
@@ -108,28 +125,26 @@ const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
         setEditing(false)
     }
 
-    return (
-        <>
-            { editing
-                ? <div className={styles.content}>
-                    <textarea
-                        ref={inputRef}
-                        onInput={resizeInput}
-                        defaultValue={props.node.message.content}
-                    />
-                    <div className={styles.editButtons}>
-                        <button className={styles.saveEdit} onClick={saveEdit}>
+    return <>
+        { editing
+            ? <div className={styles.content}>
+                <textarea
+                    ref={inputRef}
+                    onInput={resizeInput}
+                    defaultValue={props.node.message.content}
+                />
+                <div className={styles.editButtons}>
+                    <button className={styles.saveEdit} onClick={saveEdit}>
                             Save & Submit
-                        </button>
-                        <button className={styles.cancelEdit} onClick={cancelEdit}>
+                    </button>
+                    <button className={styles.cancelEdit} onClick={cancelEdit}>
                             Cancel
-                        </button>
-                    </div>
+                    </button>
                 </div>
-                : <pre className={styles.content}>{props.node.message.content}</pre> }
-            <button className={styles.edit} onClick={startEdit}><FiEdit /></button>
-        </>
-    )
+            </div>
+            : <pre className={styles.content}>{props.node.message.content}</pre> }
+        <button className={styles.edit} onClick={startEdit}><FiEdit /></button>
+    </>
 }
 
 type ListContextValues = {
