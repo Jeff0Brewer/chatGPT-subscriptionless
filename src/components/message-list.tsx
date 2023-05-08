@@ -1,7 +1,7 @@
 import React, { FC, useState, useRef, createContext, useContext } from 'react'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
-import { FiEdit, FiRefreshCcw, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import { FiEdit, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import type { TreeNode } from '@/lib/message-tree'
 import { resizeToFit } from '@/lib/textarea'
@@ -32,32 +32,11 @@ type MessageDisplayProps = {
 }
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
-    const [editing, setEditing] = useState<boolean>(false)
-    const inputRef = useRef<HTMLTextAreaElement>(null)
     const { inds, addVariant, changeVariant } = useContext(ListContext)
     if (!inds || !addVariant || !changeVariant) {
         throw new Error('ListContext uninitialized')
     }
-
-    const startEdit = (): void => {
-        setEditing(true)
-    }
-
-    const regenResponse = (): void => {
-        // placeholder
-    }
-
-    const resizeInput = (): void => {
-        if (!inputRef.current) { return }
-        resizeToFit(inputRef.current)
-    }
-
-    const saveEdit = (): void => {
-        if (!inputRef.current) { return }
-        const content = inputRef.current.value
-        addVariant(props.node, inds.slice(0, props.currInd), { role: 'user', content })
-        setEditing(false)
-    }
+    const message = props.node.message
 
     const incVariant = (): void => {
         changeVariant(inds.slice(0, props.currInd), 1)
@@ -67,11 +46,6 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
         changeVariant(inds.slice(0, props.currInd), -1)
     }
 
-    const cancelEdit = (): void => {
-        setEditing(false)
-    }
-
-    const message = props.node.message
     return (
         <>
             <div className={styles.display} data-role={message.role}>
@@ -84,39 +58,14 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                         alt={message.role}
                     />
                     { message.role === 'user'
-                        ? editing
-                            ? <div className={styles.content}>
-                                <textarea
-                                    ref={inputRef}
-                                    onInput={resizeInput}
-                                    defaultValue={message.content}
-                                />
-                                <div className={styles.editButtons}>
-                                    <button className={styles.saveEdit} onClick={saveEdit}>
-                                        Save & Submit
-                                    </button>
-                                    <button className={styles.cancelEdit} onClick={cancelEdit}>
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                            : <pre className={styles.content}>{message.content}</pre>
+                        ? <UserMessageDisplay node={props.node} currInd={props.currInd} />
                         : <ReactMarkdown className={styles.content}>{message.content}</ReactMarkdown> }
-                    <button
-                        className={styles.edit}
-                        onClick={message.role === 'user' ? startEdit : regenResponse}
-                    >
-                        { message.role === 'user'
-                            ? <FiEdit />
-                            : <FiRefreshCcw /> }
-                    </button>
-                    { props.numVariant > 1
-                        ? <div className={styles.variantSelect}>
-                            <button onClick={decVariant}><FiChevronLeft /></button>
-                            <p>{`${inds[props.currInd - 1] + 1} / ${props.numVariant}`}</p>
-                            <button onClick={incVariant}><FiChevronRight /></button>
-                        </div>
-                        : <></>}
+                    { props.numVariant > 1 &&
+                         <div className={styles.variantSelect}>
+                             <button onClick={decVariant}><FiChevronLeft /></button>
+                             <p>{`${inds[props.currInd - 1] + 1} / ${props.numVariant}`}</p>
+                             <button onClick={incVariant}><FiChevronRight /></button>
+                         </div> }
                 </span>
             </div>
             { props.currInd < inds.length
@@ -126,6 +75,59 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                     numVariant={props.node.nexts.length}
                 />
                 : <></> }
+        </>
+    )
+}
+
+type UserMessageDisplayProps = {
+    node: TreeNode,
+    currInd: number
+}
+
+const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
+    const [editing, setEditing] = useState<boolean>(false)
+    const inputRef = useRef<HTMLTextAreaElement>(null)
+    const { inds, addVariant } = useContext(ListContext)
+    if (!inds || !addVariant) {
+        throw new Error('ListContext uninitialized')
+    }
+
+    const resizeInput = (): void => {
+        if (!inputRef.current) { return }
+        resizeToFit(inputRef.current)
+    }
+
+    const startEdit = (): void => { setEditing(true) }
+
+    const cancelEdit = (): void => { setEditing(false) }
+
+    const saveEdit = (): void => {
+        if (!inputRef.current) { return }
+        const content = inputRef.current.value
+        addVariant(props.node, inds.slice(0, props.currInd), { role: 'user', content })
+        setEditing(false)
+    }
+
+    return (
+        <>
+            { editing
+                ? <div className={styles.content}>
+                    <textarea
+                        ref={inputRef}
+                        onInput={resizeInput}
+                        defaultValue={props.node.message.content}
+                    />
+                    <div className={styles.editButtons}>
+                        <button className={styles.saveEdit} onClick={saveEdit}>
+                            Save & Submit
+                        </button>
+                        <button className={styles.cancelEdit} onClick={cancelEdit}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                : <pre className={styles.content}>{props.node.message.content}</pre> }
+            <button className={styles.edit} onClick={startEdit}><FiEdit /></button>
         </>
     )
 }
