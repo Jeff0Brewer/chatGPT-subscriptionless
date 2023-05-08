@@ -1,6 +1,7 @@
 import React, { FC, useRef } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import { TbSend } from 'react-icons/tb'
+import { resizeToFit } from '@/lib/textarea'
 import styles from '@/styles/MessageInput.module.css'
 
 type MessageInputProps = {
@@ -22,10 +23,7 @@ const MessageInput: FC<MessageInputProps> = props => {
 
     const resizeInput = (): void => {
         if (!inputRef.current) { return }
-        // set height to 0, overflowing into scroll height
-        inputRef.current.style.height = ''
-        // then set height to scroll height
-        inputRef.current.style.height = `${inputRef.current.scrollHeight}px`
+        resizeToFit(inputRef.current)
     }
 
     const sendOnCtrlEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {

@@ -12,15 +12,20 @@
     padding-bottom: 200px;
 }
 
-.messageDisplay[data-role="assistant"] {
+.display[data-role="assistant"] {
     background-color: #444654;
 }
 
-.messageDisplay[data-role="user"] {
+.display[data-role="user"] {
     background-color: #343540;
 }
 
+.display pre {
+    font: inherit;
+}
+
 .inner {
+    position: relative;
     display: flex;
     max-width: 700px;
     margin: auto;
@@ -35,8 +40,13 @@
 
 .content {
     font-size: 16px;
-    padding-left: 24px;
+    margin-left: 24px;
+    width: 100%;
     max-width: 650px;
+}
+
+.content textarea {
+    width: 100%;
 }
 
 .content pre code {
@@ -46,4 +56,88 @@
     margin: 20px;
     border-radius: 5px;
     background-color: #000;
+    overflow-x: scroll;
+}
+
+.edit {
+    display: none;
+    place-content: center;
+    position: absolute;
+    padding-top: inherit;
+    top: 0;
+    right: -20px;
+    background-color: transparent;
+    border: none;
+    color: #acacbe;
+}
+
+.display:hover .edit {
+    display: block;
+}
+
+.edit * {
+    width: 22px;
+    height: 22px;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+.edit:hover {
+    color: #fffc;
+}
+
+.edit:hover * {
+    background-color: #fff1;
+}
+
+.saveEdit, .cancelEdit {
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.saveEdit {
+    background-color: #0FA27F;
+    border: none;
+    margin-right: 8px;
+}
+
+.saveEdit:hover {
+    background-color: #0d8f70;
+}
+
+.cancelEdit {
+    background-color: transparent;
+    border: 1px solid #fff3;
+}
+
+.cancelEdit:hover {
+    background-color: #fff1;
+}
+
+.editButtons {
+    display: flex;
+    justify-content: center;
+}
+
+.variantSelect {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    color: #fff;
+    font-size: 12px;
+    padding-top: inherit;
+    position: absolute;
+    top: 0;
+    left: -60px;
+}
+
+.variantSelect button {
+    background-color: transparent;
+    border: none;
+    display: grid;
+    place-content: center;
+    color: inherit;
+    font: inherit;
 }

@@ -3,6 +3,9 @@ import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
 import MessageList from '@/components/message-list'
+import ListContext from '@/lib/list-context'
+import type { TreeNode } from '@/lib/message-tree'
+import * as tr from '@/lib/message-tree'
 import { jsonPostBody } from '@/lib/fetch'
 import styles from '@/styles/Chat.module.css'
 
@@ -10,16 +13,21 @@ const DEFAULT_MODEL = 'GPT-3.5-turbo'
 
 const Chat: FC = () => {
     const [model, setModel] = useState<string>(DEFAULT_MODEL)
-    const [messages, setMessages] = useState<Array<Message>>([])
+    const [tree, setTree] = useState<TreeNode>(tr.newNode({ role: 'system', content: '' }, null))
+    const [inds, setInds] = useState<Array<number>>([])
+    const [lastNode, setLastNode] = useState<TreeNode>(tree)
 
     useEffect(() => {
-        if (messages.length && messages[messages.length - 1].role === 'user') {
+        // get chat completion if user sent last message
+        if (lastNode.message.role === 'user') {
             getCompletion()
         }
-    }, [messages])
+    }, [tree])
 
     // complete current message list, append new message
     const getCompletion = async (): Promise<void> => {
+        // get completion stream from endpoint using current message tree
+        const messages = tr.getList(tree, inds)
         const res = await fetch('/api/complete', jsonPostBody({ model, messages }))
         if (!res.ok) {
             const { message } = await res.json()
@@ -29,7 +37,12 @@ const Chat: FC = () => {
         if (!reader) {
             throw new Error('Invalid stream reader from endpoint')
         }
-        let content = ''
+
+        // add new empty message to tree, fill in content as its streamed
+        const { ind, node } = tr.addChild(lastNode, { role: 'assistant', content: '' })
+        setInds([...inds, ind])
+        setLastNode(node)
+
         // explicit any type since ReadableStreamReadResult interface is private :)
         const readStream = ({ done, value }: any): Promise<void> | void => {
             if (done) { return }
@@ -44,8 +57,8 @@ const Chat: FC = () => {
                 } else {
                     const token = JSON.parse(response)?.choices?.[0]?.delta?.content
                     if (token) {
-                        content += token
-                        setMessages([...messages, { role: 'assistant', content }])
+                        node.message.content += token
+                        setTree({ ...tree })
                     }
                 }
             }
@@ -55,15 +68,35 @@ const Chat: FC = () => {
     }
 
     // add message to curr list
-    const addMessage = (msg: Message): void => {
-        setMessages([...messages, msg])
+    const addMessage = (message: Message): void => {
+        // add message as child of current message
+        const { ind, node } = tr.addChild(lastNode, message)
+        setTree({ ...tree })
+        setLastNode(node)
+        // update indices with index of new message
+        setInds([...inds, ind])
+    }
+
+    const addVariant = (node: TreeNode, nodeInd: Array<number>, message: Message): void => {
+        const { ind, node: variant } = tr.addSibling(node, message)
+        setTree({ ...tree })
+        setInds([...nodeInd.slice(0, -1), ind])
+        setLastNode(variant)
+    }
+
+    const changeVariant = (nodeInd: Array<number>, delta: number): void => {
+        const { inds, lastNode } = tr.changeVariant(tree, nodeInd, delta)
+        setInds(inds)
+        setLastNode(lastNode)
     }
 
     return (
         <main className={styles.chat}>
-            { messages.length === 0
-                ? <ModelDropdown model={model} setModel={setModel} />
-                : <MessageList model={model} messages={messages} /> }
+            { lastNode.message.role !== 'system'
+                ? <ListContext.Provider value={{ inds, addVariant, changeVariant }}>
+                    <MessageList model={model} tree={tree} />
+                </ListContext.Provider>
+                : <ModelDropdown model={model} setModel={setModel} /> }
             <div className={styles.bottom}>
                 <MessageInput addMessage={addMessage} />
                 <p className={styles.footer}>
