@@ -12,7 +12,7 @@ const MessageInput: FC<MessageInputProps> = props => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     const sendMessage = (): void => {
-        if (!inputRef.current) { return }
+        if (!inputRef.current || !inputRef.current.value) { return }
         // send user message
         const content = inputRef.current.value
         props.addMessage({ role: 'user', content })
