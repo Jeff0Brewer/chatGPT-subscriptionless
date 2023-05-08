@@ -2,7 +2,7 @@ import React, { FC, useState, useEffect } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
-import MessageList from '@/components/message-list'
+import MessageList, { ListContext } from '@/components/message-list'
 import type { TreeNode } from '@/lib/message-tree'
 import * as tr from '@/lib/message-tree'
 import { jsonPostBody } from '@/lib/fetch'
@@ -104,13 +104,9 @@ const Chat: FC = () => {
     return (
         <main className={styles.chat}>
             { tree
-                ? <MessageList
-                    model={model}
-                    tree={tree}
-                    inds={inds}
-                    addVariant={addVariant}
-                    changeVariant={changeVariant}
-                />
+                ? <ListContext.Provider value={{ inds, addVariant, changeVariant }}>
+                    <MessageList model={model} tree={tree} />
+                </ListContext.Provider>
                 : <ModelDropdown model={model} setModel={setModel} /> }
             <div className={styles.bottom}>
                 <MessageInput addMessage={addMessage} />

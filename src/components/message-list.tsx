@@ -1,4 +1,4 @@
-import React, { FC, useState, useRef } from 'react'
+import React, { FC, useState, useRef, createContext, useContext } from 'react'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 import { FiEdit, FiRefreshCcw, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
@@ -12,9 +12,6 @@ import styles from '@/styles/MessageList.module.css'
 type MessageListProps = {
     model: string,
     tree: TreeNode,
-    inds: Array<number>,
-    addVariant: (node: TreeNode, nodeInd: Array<number>, message: Message) => void,
-    changeVariant: (nodeInd: Array<number>, delta: number) => void
 }
 
 const MessageList: FC<MessageListProps> = props => {
@@ -22,14 +19,7 @@ const MessageList: FC<MessageListProps> = props => {
         <section className={styles.list}>
             <p className={styles.modelLabel}>Model: {props.model}</p>
             <div>
-                <MessageDisplay
-                    node={props.tree}
-                    inds={props.inds}
-                    currInd={0}
-                    numVariant={0}
-                    addVariant={props.addVariant}
-                    changeVariant={props.changeVariant}
-                />
+                <MessageDisplay node={props.tree} currInd={0} numVariant={0} />
             </div>
         </section>
     )
@@ -37,17 +27,17 @@ const MessageList: FC<MessageListProps> = props => {
 
 type MessageDisplayProps = {
     node: TreeNode,
-    inds: Array<number>,
     currInd: number,
     numVariant: number,
-    addVariant: (node: TreeNode, nodeInd: Array<number>, message: Message) => void,
-    changeVariant: (nodeInd: Array<number>, delta: number) => void
 }
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
     const [editing, setEditing] = useState<boolean>(false)
     const inputRef = useRef<HTMLTextAreaElement>(null)
-    const message = props.node.message
+    const { inds, addVariant, changeVariant } = useContext(ListContext)
+    if (!inds || !addVariant || !changeVariant) {
+        throw new Error('ListContext uninitialized')
+    }
 
     const startEdit = (): void => {
         setEditing(true)
@@ -65,22 +55,23 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
     const saveEdit = (): void => {
         if (!inputRef.current) { return }
         const content = inputRef.current.value
-        props.addVariant(props.node, props.inds.slice(0, props.currInd), { role: 'user', content })
+        addVariant(props.node, inds.slice(0, props.currInd), { role: 'user', content })
         setEditing(false)
     }
 
     const incVariant = (): void => {
-        props.changeVariant(props.inds.slice(0, props.currInd), 1)
+        changeVariant(inds.slice(0, props.currInd), 1)
     }
 
     const decVariant = (): void => {
-        props.changeVariant(props.inds.slice(0, props.currInd), -1)
+        changeVariant(inds.slice(0, props.currInd), -1)
     }
 
     const cancelEdit = (): void => {
         setEditing(false)
     }
 
+    const message = props.node.message
     return (
         <>
             <div className={styles.display} data-role={message.role}>
@@ -122,24 +113,33 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                     { props.numVariant > 1
                         ? <div className={styles.variantSelect}>
                             <button onClick={decVariant}><FiChevronLeft /></button>
-                            <p>{`${props.inds[props.currInd - 1] + 1} / ${props.numVariant}`}</p>
+                            <p>{`${inds[props.currInd - 1] + 1} / ${props.numVariant}`}</p>
                             <button onClick={incVariant}><FiChevronRight /></button>
                         </div>
                         : <></>}
                 </span>
             </div>
-            { props.currInd < props.inds.length
+            { props.currInd < inds.length
                 ? <MessageDisplay
-                    node={props.node.nexts[props.inds[props.currInd]]}
-                    inds={props.inds}
+                    node={props.node.nexts[inds[props.currInd]]}
                     currInd={props.currInd + 1}
                     numVariant={props.node.nexts.length}
-                    addVariant={props.addVariant}
-                    changeVariant={props.changeVariant}
                 />
                 : <></> }
         </>
     )
 }
 
+type ListContextValues = {
+    inds: Array<number>,
+    addVariant: (node: TreeNode, nodeInd: Array<number>, message: Message) => void,
+    changeVariant: (nodeInd: Array<number>, delta: number) => void
+}
+
+const ListContext = createContext<Partial<ListContextValues>>({})
+
 export default MessageList
+
+export {
+    ListContext
+}
