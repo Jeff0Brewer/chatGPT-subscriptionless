@@ -46,7 +46,7 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                 />
                 { props.node.message.role === 'user'
                     ? <UserMessageDisplay node={props.node} currInd={props.currInd} />
-                    : <ReactMarkdown className={styles.content}>
+                    : <ReactMarkdown className={styles.gptContent}>
                         {props.node.message.content}
                     </ReactMarkdown> }
                 <VariantSelector currInd={props.currInd} numVariant={props.numVariant} />
@@ -116,7 +116,7 @@ const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
 
     return <>
         { editing
-            ? <div className={styles.content}>
+            ? <div className={styles.userContent}>
                 <textarea
                     ref={inputRef}
                     onInput={resizeInput}
@@ -131,7 +131,7 @@ const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
                     </button>
                 </div>
             </div>
-            : <pre className={styles.content}>{props.node.message.content}</pre> }
+            : <pre className={styles.userContent}>{props.node.message.content}</pre> }
         <button className={styles.edit} onClick={startEdit}><FiEdit /></button>
     </>
 }
