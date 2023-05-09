@@ -41,9 +41,26 @@
 
 .content {
     font-size: 16px;
+    line-height: 30px;
     margin-left: 24px;
     width: 100%;
     max-width: 650px;
+}
+
+.content > * {
+    margin: 20px 0;
+}
+
+.content > *:first-child {
+    margin: 0 0 20px 0;
+}
+
+.content > *:last-child {
+    margin: 20px 0 0 0;
+}
+
+.content > *:only-child {
+    margin: 0;
 }
 
 .content textarea {
@@ -54,10 +71,12 @@
     display: block;
     width: 100%;
     padding: 20px;
-    margin: 20px;
     border-radius: 5px;
     background-color: #000;
     overflow-x: scroll;
+    font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace;
+    font-size: 14px;
+    line-height: 22px;
 }
 
 .edit {
