@@ -42,6 +42,7 @@ const Chat: FC = () => {
         }
         setStreaming(true)
         // explicit any type since ReadableStreamReadResult interface is private :)
+        let response = ''
         const readStream = ({ done, value }: any): Promise<void> | void => {
             if (done) { return }
             const lines = Buffer.from(value)
@@ -49,15 +50,18 @@ const Chat: FC = () => {
                 .split('\n')
                 .filter(line => line.trim() !== '')
             for (const line of lines) {
-                const response = line.replace(/^data: /, '')
+                // accumulate response to join split JSONs
+                response += line.replace(/^data: /, '')
                 if (response === '[DONE]') {
                     return
                 } else {
                     try {
                         const token = JSON.parse(response)?.choices?.[0]?.delta?.content
                         if (token) { streamContent.current += token }
+                        // clear response accumulation if parse succeded
+                        response = ''
                     } catch {
-                        console.log(`JSON parse error for: ${response}`)
+                        console.error(`Incomplete json: ${response}`)
                     }
                 }
             }
