@@ -92,7 +92,7 @@
     color: #acacbe;
 }
 
-.display:hover .edit {
+.userDisplay:hover .edit {
     display: block;
 }
 
