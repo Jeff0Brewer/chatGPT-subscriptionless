@@ -1,10 +1,9 @@
 import { createContext, useContext } from 'react'
-import type { TreeNode } from '@/lib/message-tree'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 
 type ListContextValues = {
     inds: Array<number>,
-    addVariant: (node: TreeNode, nodeInd: Array<number>, message: Message) => void,
+    addVariant: (nodeInd: Array<number>, message: Message) => void,
     changeVariant: (nodeInd: Array<number>, delta: number) => void
 }
 

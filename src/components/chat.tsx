@@ -80,11 +80,11 @@ const Chat: FC = () => {
         setInds([...inds, ind])
     }
 
-    const addVariant = (node: TreeNode, nodeInd: Array<number>, message: Message): void => {
-        const { ind, node: variant } = tr.addSibling(node, message)
+    const addVariant = (nodeInd: Array<number>, message: Message): void => {
+        const { ind, node } = tr.addSibling(tree, nodeInd, message)
         setTree({ ...tree })
         setInds([...nodeInd.slice(0, -1), ind])
-        setLastNode(variant)
+        setLastNode(node)
     }
 
     const changeVariant = (nodeInd: Array<number>, delta: number): void => {

@@ -41,8 +41,15 @@ const addChild = (parent: TreeNode, message: Message): { ind: number, node: Tree
 
 // add new node as sibling in nexts list
 // return node and node's index in parent's nexts list
-const addSibling = (node: TreeNode, message: Message): {ind: number, node: TreeNode} => {
-    const parent = node.prev
+const addSibling = (head: TreeNode, nodeInds: Array<number>, message: Message): {ind: number, node: TreeNode} => {
+    let curr = head
+    for (let i = 0; i < nodeInds.length; i++) {
+        curr = curr.nexts[nodeInds[i]]
+        if (!curr) {
+            throw new Error(`Node at index ${nodeInds.slice(0, i + 1)} does not exist`)
+        }
+    }
+    const parent = curr.prev
     if (!parent) {
         throw new Error('Cannot add sibling to node with no parent')
     }

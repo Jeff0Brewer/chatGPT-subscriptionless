@@ -141,7 +141,7 @@ const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
     const saveEdit = (): void => {
         if (!inputRef.current) { return }
         const content = inputRef.current.value
-        addVariant(props.node, inds.slice(0, props.currInd), { role: 'user', content })
+        addVariant(inds.slice(0, props.currInd), { role: 'user', content })
         setEditing(false)
     }
 
