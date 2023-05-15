@@ -1,4 +1,5 @@
 import React, { FC, useState, useRef, RefObject, useEffect } from 'react'
+import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 import { FiEdit, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
@@ -9,70 +10,148 @@ import userIcon from '@/icons/user-icon.jpg'
 import gptIcon from '@/icons/gpt-icon.jpg'
 import styles from '@/styles/MessageList.module.css'
 
-type MessageListProps = {
+type ChatHistoryProps = {
     model: string,
     tree: TreeNode,
+    streaming: boolean,
+    streamContent: RefObject<string>
 }
 
-const MessageList: FC<MessageListProps> = props => {
+const ChatHistory: FC<ChatHistoryProps> = ({ model, tree, streaming, streamContent }) => {
     return <>
-        <p className={styles.modelLabel}>Model: {props.model}</p>
-        <div>
-            <MessageDisplay node={props.tree} currInd={0} numVariant={0} />
-        </div>
+        <p className={styles.modelLabel}>Model: {model}</p>
+        <MessageList node={tree} currInd={0} numVariant={0} />
+        { streaming &&
+            <StreamDisplay streamContent={streamContent} currInd={0} numVariant={0} /> }
+    </>
+}
+
+type MessageListProps = {
+    node: TreeNode,
+    currInd: number,
+    numVariant: number
+}
+
+const MessageList: FC<MessageListProps> = ({ node, currInd, numVariant }) => {
+    const { inds } = useListContext()
+    return <>
+        <MessageDisplay message={node.message} currInd={currInd} numVariant={numVariant} />
+        { currInd < inds.length &&
+            <MessageList
+                node={node.nexts[inds[currInd]]}
+                currInd={currInd + 1}
+                numVariant={node.nexts.length}
+            />
+        }
     </>
 }
 
 type MessageDisplayProps = {
-    node: TreeNode,
+    message: Message,
     currInd: number,
-    numVariant: number,
+    numVariant: number
 }
 
-const MessageDisplay: FC<MessageDisplayProps> = props => {
-    const { inds } = useListContext()
+const MessageDisplay: FC<MessageDisplayProps> = ({ message, currInd, numVariant }) => {
+    // don't display system messages
+    if (message.role === 'system') { return <></> }
 
-    return <>
-        { props.node.message.role !== 'system' &&
-        <div className={styles.display} data-role={props.node.message.role}>
+    return (
+        <div className={styles.display} data-role={message.role}>
             <span className={styles.inner}>
                 <Image
                     className={styles.icon}
                     width={40}
                     height={40}
-                    src={props.node.message.role === 'user' ? userIcon.src : gptIcon.src}
-                    alt={props.node.message.role}
+                    src={message.role === 'user' ? userIcon.src : gptIcon.src}
+                    alt={message.role}
                 />
-                { props.node.message.role === 'user'
-                    ? <UserMessageDisplay node={props.node} currInd={props.currInd} />
-                    : <ReactMarkdown className={styles.gptContent}>
-                        {props.node.message.content}
-                    </ReactMarkdown> }
-                <VariantSelector currInd={props.currInd} numVariant={props.numVariant} />
+                <VariantSelector currInd={currInd} numVariant={numVariant} />
+                { message.role === 'user'
+                    ? <UserContent message={message} currInd={currInd} />
+                    : <GptContent message={message} /> }
             </span>
-        </div> }
-        {/* append next in tree recursively to display full list */}
-        { props.currInd < inds.length &&
-                <MessageDisplay
-                    node={props.node.nexts[inds[props.currInd]]}
-                    currInd={props.currInd + 1}
-                    numVariant={props.node.nexts.length}
-                /> }
+        </div>
+    )
+}
+
+type UserContentProps = {
+    message: Message,
+    currInd: number
+}
+
+const UserContent: FC<UserContentProps> = ({ message, currInd }) => {
+    const [editing, setEditing] = useState<boolean>(false)
+    const inputRef = useRef<HTMLTextAreaElement>(null)
+    const { inds, addVariant } = useListContext()
+
+    const startEdit = (): void => { setEditing(true) }
+
+    const cancelEdit = (): void => { setEditing(false) }
+
+    const saveEdit = (): void => {
+        if (!inputRef.current) { return }
+        const content = inputRef.current.value
+        addVariant(inds.slice(0, currInd), { role: 'user', content })
+        setEditing(false)
+    }
+
+    const resizeInput = (): void => {
+        if (!inputRef.current) { return }
+        resizeToFit(inputRef.current)
+    }
+
+    return <>
+        { editing
+            ? <div className={styles.userContent}>
+                <textarea
+                    ref={inputRef}
+                    onInput={resizeInput}
+                    defaultValue={message.content}
+                />
+                <div className={styles.editButtons}>
+                    <button className={styles.saveEdit} onClick={saveEdit}>
+                            Save & Submit
+                    </button>
+                    <button className={styles.cancelEdit} onClick={cancelEdit}>
+                            Cancel
+                    </button>
+                </div>
+            </div>
+            : <>
+                <pre className={styles.userContent}>{message.content}</pre>
+                <button className={styles.edit} onClick={startEdit}><FiEdit /></button>
+            </> }
     </>
 }
 
-type StreamDisplayProps = {
-    contentRef: RefObject<string>
+type GptContentProps = {
+    message: Message
 }
 
-const StreamDisplay: FC<StreamDisplayProps> = props => {
-    const [content, setContent] = useState<string>('')
+const GptContent: FC<GptContentProps> = ({ message }) => {
+    return (
+        <ReactMarkdown className={styles.gptContent}>
+            {message.content}
+        </ReactMarkdown>
+    )
+}
+
+type StreamDisplayProps = {
+    streamContent: RefObject<string>,
+    currInd: number,
+    numVariant: number
+}
+
+const StreamDisplay: FC<StreamDisplayProps> = ({ streamContent, currInd, numVariant }) => {
+    const [message, setMessage] = useState<Message>({ role: 'assistant', content: '' })
     const intervalId = useRef<number>(-1)
 
     useEffect(() => {
         intervalId.current = window.setInterval(() => {
-            if (props.contentRef.current) {
-                setContent(props.contentRef.current)
+            if (streamContent.current) {
+                message.content = streamContent.current
+                setMessage({ ...message })
             }
         }, 100)
         return () => {
@@ -81,20 +160,7 @@ const StreamDisplay: FC<StreamDisplayProps> = props => {
     }, [])
 
     return (
-        <div className={styles.display} data-role={'assistant'}>
-            <span className={styles.inner}>
-                <Image
-                    className={styles.icon}
-                    width={40}
-                    height={40}
-                    src={gptIcon.src}
-                    alt={'assistant'}
-                />
-                <ReactMarkdown className={styles.gptContent}>
-                    {content}
-                </ReactMarkdown>
-            </span>
-        </div>
+        <MessageDisplay message={message} currInd={currInd} numVariant={numVariant} />
     )
 }
 
@@ -124,55 +190,4 @@ const VariantSelector: FC<VariantSelectorProps> = props => {
     </>
 }
 
-type UserMessageDisplayProps = {
-    node: TreeNode,
-    currInd: number
-}
-
-const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
-    const [editing, setEditing] = useState<boolean>(false)
-    const inputRef = useRef<HTMLTextAreaElement>(null)
-    const { inds, addVariant } = useListContext()
-
-    const startEdit = (): void => { setEditing(true) }
-
-    const cancelEdit = (): void => { setEditing(false) }
-
-    const saveEdit = (): void => {
-        if (!inputRef.current) { return }
-        const content = inputRef.current.value
-        addVariant(inds.slice(0, props.currInd), { role: 'user', content })
-        setEditing(false)
-    }
-
-    const resizeInput = (): void => {
-        if (!inputRef.current) { return }
-        resizeToFit(inputRef.current)
-    }
-
-    return <>
-        { editing
-            ? <div className={styles.userContent}>
-                <textarea
-                    ref={inputRef}
-                    onInput={resizeInput}
-                    defaultValue={props.node.message.content}
-                />
-                <div className={styles.editButtons}>
-                    <button className={styles.saveEdit} onClick={saveEdit}>
-                            Save & Submit
-                    </button>
-                    <button className={styles.cancelEdit} onClick={cancelEdit}>
-                            Cancel
-                    </button>
-                </div>
-            </div>
-            : <pre className={styles.userContent}>{props.node.message.content}</pre> }
-        <button className={styles.edit} onClick={startEdit}><FiEdit /></button>
-    </>
-}
-
-export default MessageList
-export {
-    StreamDisplay
-}
+export default ChatHistory

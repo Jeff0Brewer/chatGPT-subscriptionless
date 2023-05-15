@@ -2,7 +2,7 @@ import React, { FC, useState, useEffect, useRef } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
-import MessageList, { StreamDisplay } from '@/components/message-list'
+import ChatHistory from '@/components/message-list'
 import ListContext from '@/lib/list-context'
 import type { TreeNode } from '@/lib/message-tree'
 import * as tr from '@/lib/message-tree'
@@ -98,9 +98,12 @@ const Chat: FC = () => {
             { lastNode.message.role !== 'system'
                 ? <ListContext.Provider value={{ inds, addVariant, changeVariant }}>
                     <section className={styles.list}>
-                        <MessageList model={model} tree={tree} />
-                        { streaming && lastNode.message.role === 'user' &&
-                            <StreamDisplay contentRef={streamContent} /> }
+                        <ChatHistory
+                            model={model}
+                            tree={tree}
+                            streaming={streaming}
+                            streamContent={streamContent}
+                        />
                     </section>
                 </ListContext.Provider>
                 : <ModelDropdown model={model} setModel={setModel} /> }
