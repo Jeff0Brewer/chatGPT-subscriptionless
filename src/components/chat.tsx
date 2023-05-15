@@ -21,6 +21,7 @@ const Chat: FC = () => {
 
     useEffect(() => {
         // get chat completion if user sent last message
+        // prevent new completions while already streaming
         if (!streaming && lastNode.message.role === 'user') {
             getCompletion()
         }
@@ -39,7 +40,6 @@ const Chat: FC = () => {
         if (!reader) {
             throw new Error('Invalid stream reader from endpoint')
         }
-
         setStreaming(true)
         // explicit any type since ReadableStreamReadResult interface is private :)
         const readStream = ({ done, value }: any): Promise<void> | void => {
@@ -55,9 +55,7 @@ const Chat: FC = () => {
                 } else {
                     try {
                         const token = JSON.parse(response)?.choices?.[0]?.delta?.content
-                        if (token) {
-                            streamContent.current += token
-                        }
+                        if (token) { streamContent.current += token }
                     } catch {
                         console.log(`JSON parse error for: ${response}`)
                     }
