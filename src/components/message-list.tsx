@@ -14,16 +14,17 @@ type ChatHistoryProps = {
     model: string,
     tree: TreeNode,
     streaming: boolean,
+    displayStreamed: boolean,
     streamContent: RefObject<string>
 }
 
-const ChatHistory: FC<ChatHistoryProps> = ({ model, tree, streaming, streamContent }) => {
+const ChatHistory: FC<ChatHistoryProps> = ({ model, tree, streaming, displayStreamed, streamContent }) => {
     return (
         <section className={styles.list}>
             <p className={styles.modelLabel}>Model: {model}</p>
             <MessageList node={tree} currInd={0} numVariant={0} />
-            { streaming &&
-            <StreamDisplay streamContent={streamContent} currInd={0} numVariant={0} /> }
+            { streaming && displayStreamed &&
+            <StreamDisplay streamContent={streamContent} /> }
         </section>
     )
 }
@@ -141,11 +142,9 @@ const GptContent: FC<GptContentProps> = ({ message }) => {
 
 type StreamDisplayProps = {
     streamContent: RefObject<string>,
-    currInd: number,
-    numVariant: number
 }
 
-const StreamDisplay: FC<StreamDisplayProps> = ({ streamContent, currInd, numVariant }) => {
+const StreamDisplay: FC<StreamDisplayProps> = ({ streamContent }) => {
     const [message, setMessage] = useState<Message>({ role: 'assistant', content: '' })
     const intervalId = useRef<number>(-1)
 
@@ -162,7 +161,7 @@ const StreamDisplay: FC<StreamDisplayProps> = ({ streamContent, currInd, numVari
     }, [])
 
     return (
-        <MessageDisplay message={message} currInd={currInd} numVariant={numVariant} />
+        <MessageDisplay message={message} currInd={0} numVariant={0} />
     )
 }
 

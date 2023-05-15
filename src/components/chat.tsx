@@ -101,6 +101,7 @@ const Chat: FC = () => {
                         model={model}
                         tree={tree}
                         streaming={streaming}
+                        displayStreamed={lastNode.message.role === 'user'}
                         streamContent={streamContent}
                     />
                 </ListContext.Provider>
