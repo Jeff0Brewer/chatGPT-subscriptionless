@@ -1,4 +1,4 @@
-import React, { FC, useState, useRef } from 'react'
+import React, { FC, useState, useRef, RefObject, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 import { FiEdit, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
@@ -15,14 +15,12 @@ type MessageListProps = {
 }
 
 const MessageList: FC<MessageListProps> = props => {
-    return (
-        <section className={styles.list}>
-            <p className={styles.modelLabel}>Model: {props.model}</p>
-            <div>
-                <MessageDisplay node={props.tree} currInd={0} numVariant={0} />
-            </div>
-        </section>
-    )
+    return <>
+        <p className={styles.modelLabel}>Model: {props.model}</p>
+        <div>
+            <MessageDisplay node={props.tree} currInd={0} numVariant={0} />
+        </div>
+    </>
 }
 
 type MessageDisplayProps = {
@@ -33,6 +31,7 @@ type MessageDisplayProps = {
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
     const { inds } = useListContext()
+
     return <>
         { props.node.message.role !== 'system' &&
         <div className={styles.display} data-role={props.node.message.role}>
@@ -60,6 +59,43 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
                     numVariant={props.node.nexts.length}
                 /> }
     </>
+}
+
+type StreamDisplayProps = {
+    contentRef: RefObject<string>
+}
+
+const StreamDisplay: FC<StreamDisplayProps> = props => {
+    const [content, setContent] = useState<string>('')
+    const intervalId = useRef<number>(-1)
+
+    useEffect(() => {
+        intervalId.current = window.setInterval(() => {
+            if (props.contentRef.current) {
+                setContent(props.contentRef.current)
+            }
+        }, 100)
+        return () => {
+            window.clearInterval(intervalId.current)
+        }
+    }, [])
+
+    return (
+        <div className={styles.display} data-role={'assistant'}>
+            <span className={styles.inner}>
+                <Image
+                    className={styles.icon}
+                    width={40}
+                    height={40}
+                    src={gptIcon.src}
+                    alt={'assistant'}
+                />
+                <ReactMarkdown className={styles.gptContent}>
+                    {content}
+                </ReactMarkdown>
+            </span>
+        </div>
+    )
 }
 
 type VariantSelectorProps = {
@@ -137,3 +173,6 @@ const UserMessageDisplay: FC<UserMessageDisplayProps> = props => {
 }
 
 export default MessageList
+export {
+    StreamDisplay
+}

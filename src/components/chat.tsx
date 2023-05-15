@@ -1,8 +1,8 @@
-import React, { FC, useState, useEffect } from 'react'
+import React, { FC, useState, useEffect, useRef } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ModelDropdown from '@/components/model-dropdown'
 import MessageInput from '@/components/message-input'
-import MessageList from '@/components/message-list'
+import MessageList, { StreamDisplay } from '@/components/message-list'
 import ListContext from '@/lib/list-context'
 import type { TreeNode } from '@/lib/message-tree'
 import * as tr from '@/lib/message-tree'
@@ -16,10 +16,12 @@ const Chat: FC = () => {
     const [tree, setTree] = useState<TreeNode>(tr.newNode({ role: 'system', content: '' }, null))
     const [inds, setInds] = useState<Array<number>>([])
     const [lastNode, setLastNode] = useState<TreeNode>(tree)
+    const [streaming, setStreaming] = useState<boolean>(false)
+    const streamContent = useRef<string>('')
 
     useEffect(() => {
         // get chat completion if user sent last message
-        if (lastNode.message.role === 'user') {
+        if (!streaming && lastNode.message.role === 'user') {
             getCompletion()
         }
     }, [tree])
@@ -38,11 +40,7 @@ const Chat: FC = () => {
             throw new Error('Invalid stream reader from endpoint')
         }
 
-        // add new empty message to tree, fill in content as its streamed
-        const { ind, node } = tr.addChild(lastNode, { role: 'assistant', content: '' })
-        setInds([...inds, ind])
-        setLastNode(node)
-
+        setStreaming(true)
         // explicit any type since ReadableStreamReadResult interface is private :)
         const readStream = ({ done, value }: any): Promise<void> | void => {
             if (done) { return }
@@ -58,8 +56,7 @@ const Chat: FC = () => {
                     try {
                         const token = JSON.parse(response)?.choices?.[0]?.delta?.content
                         if (token) {
-                            node.message.content += token
-                            setTree({ ...tree })
+                            streamContent.current += token
                         }
                     } catch {
                         console.log(`JSON parse error for: ${response}`)
@@ -69,6 +66,10 @@ const Chat: FC = () => {
             return reader.read().then(readStream)
         }
         await reader.read().then(readStream)
+
+        addMessage({ role: 'assistant', content: streamContent.current })
+        streamContent.current = ''
+        setStreaming(false)
     }
 
     // add message to curr list
@@ -98,7 +99,11 @@ const Chat: FC = () => {
         <main className={styles.chat}>
             { lastNode.message.role !== 'system'
                 ? <ListContext.Provider value={{ inds, addVariant, changeVariant }}>
-                    <MessageList model={model} tree={tree} />
+                    <section className={styles.list}>
+                        <MessageList model={model} tree={tree} />
+                        { streaming && lastNode.message.role === 'user' &&
+                            <StreamDisplay contentRef={streamContent} /> }
+                    </section>
                 </ListContext.Provider>
                 : <ModelDropdown model={model} setModel={setModel} /> }
             <div className={styles.bottom}>
