@@ -97,14 +97,12 @@ const Chat: FC = () => {
         <main className={styles.chat}>
             { lastNode.message.role !== 'system'
                 ? <ListContext.Provider value={{ inds, addVariant, changeVariant }}>
-                    <section className={styles.list}>
-                        <ChatHistory
-                            model={model}
-                            tree={tree}
-                            streaming={streaming}
-                            streamContent={streamContent}
-                        />
-                    </section>
+                    <ChatHistory
+                        model={model}
+                        tree={tree}
+                        streaming={streaming}
+                        streamContent={streamContent}
+                    />
                 </ListContext.Provider>
                 : <ModelDropdown model={model} setModel={setModel} /> }
             <div className={styles.bottom}>

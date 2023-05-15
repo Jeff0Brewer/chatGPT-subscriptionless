@@ -18,12 +18,14 @@ type ChatHistoryProps = {
 }
 
 const ChatHistory: FC<ChatHistoryProps> = ({ model, tree, streaming, streamContent }) => {
-    return <>
-        <p className={styles.modelLabel}>Model: {model}</p>
-        <MessageList node={tree} currInd={0} numVariant={0} />
-        { streaming &&
+    return (
+        <section className={styles.list}>
+            <p className={styles.modelLabel}>Model: {model}</p>
+            <MessageList node={tree} currInd={0} numVariant={0} />
+            { streaming &&
             <StreamDisplay streamContent={streamContent} currInd={0} numVariant={0} /> }
-    </>
+        </section>
+    )
 }
 
 type MessageListProps = {
@@ -36,6 +38,7 @@ const MessageList: FC<MessageListProps> = ({ node, currInd, numVariant }) => {
     const { inds } = useListContext()
     return <>
         <MessageDisplay message={node.message} currInd={currInd} numVariant={numVariant} />
+        {/* recursively display next message until at end of tree */}
         { currInd < inds.length &&
             <MessageList
                 node={node.nexts[inds[currInd]]}
@@ -57,7 +60,7 @@ const MessageDisplay: FC<MessageDisplayProps> = ({ message, currInd, numVariant 
     if (message.role === 'system') { return <></> }
 
     return (
-        <div className={styles.display} data-role={message.role}>
+        <div className={message.role === 'user' ? styles.userDisplay : styles.gptDisplay}>
             <span className={styles.inner}>
                 <Image
                     className={styles.icon}
@@ -85,16 +88,15 @@ const UserContent: FC<UserContentProps> = ({ message, currInd }) => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
     const { inds, addVariant } = useListContext()
 
-    const startEdit = (): void => { setEditing(true) }
-
-    const cancelEdit = (): void => { setEditing(false) }
-
     const saveEdit = (): void => {
         if (!inputRef.current) { return }
         const content = inputRef.current.value
         addVariant(inds.slice(0, currInd), { role: 'user', content })
         setEditing(false)
     }
+
+    const startEdit = (): void => { setEditing(true) }
+    const cancelEdit = (): void => { setEditing(false) }
 
     const resizeInput = (): void => {
         if (!inputRef.current) { return }

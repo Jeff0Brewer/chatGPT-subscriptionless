@@ -7,12 +7,17 @@
     background-color: #444654;
 }
 
-.display[data-role="assistant"] {
-    background-color: #444654;
+.list {
+    width: 100%;
+    padding-bottom: 200px;
 }
 
-.display[data-role="user"] {
+.userDisplay {
     background-color: #343540;
+}
+
+.gptDisplay {
+    background-color: #444654;
 }
 
 .inner {
