@@ -1,7 +1,9 @@
-import React, { FC, useState, useRef, RefObject, useEffect } from 'react'
+import React, { FC, useState, useRef, RefObject, useEffect, ReactElement } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/a11y-dark.css'
 import { FiEdit, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import type { TreeNode } from '@/lib/message-tree'
 import { useListContext } from '@/lib/list-context'
@@ -53,10 +55,11 @@ const MessageList: FC<MessageListProps> = ({ node, currInd, numVariant }) => {
 type MessageDisplayProps = {
     message: Message,
     currInd: number,
-    numVariant: number
+    numVariant: number,
+    streamNode?: boolean
 }
 
-const MessageDisplay: FC<MessageDisplayProps> = ({ message, currInd, numVariant }) => {
+const MessageDisplay: FC<MessageDisplayProps> = ({ message, currInd, numVariant, streamNode }) => {
     // don't display system messages
     if (message.role === 'system') { return <></> }
 
@@ -73,7 +76,7 @@ const MessageDisplay: FC<MessageDisplayProps> = ({ message, currInd, numVariant 
                 <VariantSelector currInd={currInd} numVariant={numVariant} />
                 { message.role === 'user'
                     ? <UserContent message={message} currInd={currInd} />
-                    : <GptContent message={message} /> }
+                    : <GptContent message={message} streamNode={streamNode} /> }
             </span>
         </div>
     )
@@ -130,13 +133,50 @@ const UserContent: FC<UserContentProps> = ({ message, currInd }) => {
 
 type GptContentProps = {
     message: Message
+    streamNode?: boolean
 }
 
-const GptContent: FC<GptContentProps> = ({ message }) => {
+const GptContent: FC<GptContentProps> = ({ message, streamNode }) => {
     return (
-        <ReactMarkdown className={styles.gptContent}>
+        <ReactMarkdown
+            className={styles.gptContent}
+            components={{
+                code ({ inline, className, children }): ReactElement {
+                    if (inline || streamNode) {
+                        return (
+                            <code className={className}>
+                                {children}
+                            </code>
+                        )
+                    }
+                    return (
+                        <CodeBlock content={children.toString()} />
+                    )
+                }
+            }}
+        >
             {message.content}
         </ReactMarkdown>
+    )
+}
+
+type CodeBlockProps = {
+    content: string
+}
+
+const CodeBlock: FC<CodeBlockProps> = ({ content }) => {
+    const element = useRef<HTMLElement>(null)
+
+    useEffect(() => {
+        if (element.current) {
+            hljs.highlightElement(element.current)
+        }
+    }, [])
+
+    return (
+        <code ref={element}>
+            {content}
+        </code>
     )
 }
 
@@ -161,7 +201,7 @@ const StreamDisplay: FC<StreamDisplayProps> = ({ streamContent }) => {
     }, [])
 
     return (
-        <MessageDisplay message={message} currInd={0} numVariant={0} />
+        <MessageDisplay message={message} currInd={0} numVariant={0} streamNode={true} />
     )
 }
 
