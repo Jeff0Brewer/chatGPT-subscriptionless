@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/a11y-dark.css'
+import parse from 'html-react-parser'
 import { FiEdit, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import type { TreeNode } from '@/lib/message-tree'
 import { useListContext } from '@/lib/list-context'
@@ -56,10 +57,9 @@ type MessageDisplayProps = {
     message: Message,
     currInd: number,
     numVariant: number,
-    streamNode?: boolean
 }
 
-const MessageDisplay: FC<MessageDisplayProps> = ({ message, currInd, numVariant, streamNode }) => {
+const MessageDisplay: FC<MessageDisplayProps> = ({ message, currInd, numVariant }) => {
     // don't display system messages
     if (message.role === 'system') { return <></> }
 
@@ -76,9 +76,34 @@ const MessageDisplay: FC<MessageDisplayProps> = ({ message, currInd, numVariant,
                 <VariantSelector currInd={currInd} numVariant={numVariant} />
                 { message.role === 'user'
                     ? <UserContent message={message} currInd={currInd} />
-                    : <GptContent message={message} streamNode={streamNode} /> }
+                    : <GptContent message={message} /> }
             </span>
         </div>
+    )
+}
+
+type StreamDisplayProps = {
+    streamContent: RefObject<string>,
+}
+
+const StreamDisplay: FC<StreamDisplayProps> = ({ streamContent }) => {
+    const [message, setMessage] = useState<Message>({ role: 'assistant', content: '' })
+    const intervalId = useRef<number>(-1)
+
+    useEffect(() => {
+        intervalId.current = window.setInterval(() => {
+            if (streamContent.current) {
+                message.content = streamContent.current
+                setMessage({ ...message })
+            }
+        }, 100)
+        return () => {
+            window.clearInterval(intervalId.current)
+        }
+    }, [])
+
+    return (
+        <MessageDisplay message={message} currInd={0} numVariant={0} />
     )
 }
 
@@ -133,75 +158,24 @@ const UserContent: FC<UserContentProps> = ({ message, currInd }) => {
 
 type GptContentProps = {
     message: Message
-    streamNode?: boolean
 }
 
-const GptContent: FC<GptContentProps> = ({ message, streamNode }) => {
+const GptContent: FC<GptContentProps> = ({ message }) => {
     return (
         <ReactMarkdown
             className={styles.gptContent}
             components={{
-                code ({ inline, className, children }): ReactElement {
-                    if (inline || streamNode) {
-                        return (
-                            <code className={className}>
-                                {children}
-                            </code>
-                        )
+                code ({ inline, children }): ReactElement {
+                    if (inline) {
+                        return <code>{children}</code>
                     }
-                    return (
-                        <CodeBlock content={children.toString()} />
-                    )
+                    const content = parse(hljs.highlightAuto(children.toString()).value)
+                    return <code>{content}</code>
                 }
             }}
         >
             {message.content}
         </ReactMarkdown>
-    )
-}
-
-type CodeBlockProps = {
-    content: string
-}
-
-const CodeBlock: FC<CodeBlockProps> = ({ content }) => {
-    const element = useRef<HTMLElement>(null)
-
-    useEffect(() => {
-        if (element.current) {
-            hljs.highlightElement(element.current)
-        }
-    }, [])
-
-    return (
-        <code ref={element}>
-            {content}
-        </code>
-    )
-}
-
-type StreamDisplayProps = {
-    streamContent: RefObject<string>,
-}
-
-const StreamDisplay: FC<StreamDisplayProps> = ({ streamContent }) => {
-    const [message, setMessage] = useState<Message>({ role: 'assistant', content: '' })
-    const intervalId = useRef<number>(-1)
-
-    useEffect(() => {
-        intervalId.current = window.setInterval(() => {
-            if (streamContent.current) {
-                message.content = streamContent.current
-                setMessage({ ...message })
-            }
-        }, 100)
-        return () => {
-            window.clearInterval(intervalId.current)
-        }
-    }, [])
-
-    return (
-        <MessageDisplay message={message} currInd={0} numVariant={0} streamNode={true} />
     )
 }
 
