@@ -60,7 +60,7 @@
 }
 
 .list a:hover {
-    background-color: var(--input-bg);
+    background-color: var(--highlight-color);
 }
 
 .list a:last-child {

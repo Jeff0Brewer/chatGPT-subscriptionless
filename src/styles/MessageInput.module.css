@@ -39,5 +39,5 @@
 }
 
 .wrap button:hover {
-    background-color: var(--send-hover);
+    background-color: var(--highlight-color);
 }
