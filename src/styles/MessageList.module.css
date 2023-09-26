@@ -3,8 +3,8 @@
     font-weight: 500;
     text-align: center;
     padding: 12px;
-    color: #BFBFCC;
-    background-color: #444654;
+    color: var(--dim-text-color);
+    background-color: var(--gpt-bg);
 }
 
 .list {
@@ -13,11 +13,11 @@
 }
 
 .userDisplay {
-    background-color: #343540;
+    background-color: var(--user-bg);
 }
 
 .gptDisplay {
-    background-color: #444654;
+    background-color: var(--gpt-bg);
 }
 
 .inner {
@@ -31,7 +31,7 @@
 .icon {
     width: 30px;
     height: 30px;
-    border-radius: 3px;
+    border-radius: var(--border-radius-1);
 }
 
 .userContent, .gptContent {
@@ -43,8 +43,8 @@
 }
 
 .userContent {
-    font: inherit;
     white-space: pre-wrap;
+    font: inherit;
 }
 
 .userContent textarea {
@@ -71,7 +71,7 @@
     display: block;
     width: 100%;
     padding: 20px;
-    border-radius: 5px;
+    border-radius: var(--border-radius-0);
     background-color: #000;
     overflow-x: scroll;
     font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace;
@@ -87,9 +87,7 @@
     padding-top: inherit;
     top: 0;
     right: -20px;
-    background-color: transparent;
-    border: none;
-    color: #acacbe;
+    color: var(--icon-color);
 }
 
 .userDisplay:hover .edit {
@@ -100,7 +98,7 @@
     width: 22px;
     height: 22px;
     padding: 3px;
-    border-radius: 3px;
+    border-radius: var(--border-radius-1);
 }
 
 .edit:hover {
@@ -108,33 +106,33 @@
 }
 
 .edit:hover * {
-    background-color: #fff1;
+    background-color: var(--highlight-color);
 }
 
 .saveEdit, .cancelEdit {
     padding: 10px 14px;
     font-size: 14px;
-    color: #fff;
-    border-radius: 3px;
+    border-radius: var(--border-radius-1);
+    color: inherit;
 }
 
 .saveEdit {
-    background-color: #0FA27F;
+    background-color: var(--accent-color);
     border: none;
     margin-right: 8px;
 }
 
 .saveEdit:hover {
-    background-color: #0d8f70;
+    background-color: var(--accent-hover);
 }
 
 .cancelEdit {
     background-color: transparent;
-    border: 1px solid #fff3;
+    border: 1px solid var(--border-color);
 }
 
 .cancelEdit:hover {
-    background-color: #fff1;
+    background-color: var(--highlight-color);
 }
 
 .editButtons {
@@ -143,22 +141,18 @@
 }
 
 .variantSelect {
-    display: flex;
-    align-items: center;
-    height: 60px;
-    color: #fff;
-    font-size: 12px;
-    padding-top: inherit;
     position: absolute;
     top: 0;
     left: -60px;
+    display: flex;
+    align-items: center;
+    height: 60px;
+    color: inherit;
+    font-size: 12px;
+    padding-top: inherit;
 }
 
 .variantSelect button {
-    background-color: transparent;
-    border: none;
     display: grid;
     place-content: center;
-    color: inherit;
-    font: inherit;
 }

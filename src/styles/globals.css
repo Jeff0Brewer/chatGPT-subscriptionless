@@ -1,6 +1,20 @@
 :root {
-    --bg-color: #343540;
-    --border-color: #63636C;
+    --bg-color: #000;
+    --gpt-bg: #111;
+    --user-bg: #000;
+    --icon-color: #ddd;
+    --accent-color: #909;
+    --accent-hover: #606;
+    --highlight-color: #f0f4;
+
+    --input-bg: #151515;
+
+    --border-color: #fff;
+
+    --dim-text-color: #ccc;
+
+    --border-radius-0: 5px;
+    --border-radius-1: 3px;
 }
 
 * {
@@ -11,7 +25,7 @@
 
 html, body {
     color: #fff;
-    background-color: #343540;
+    background-color: var(--bg-color);
     font-family: Söhne, ui-sans-serif, system-ui, -apple-system, Segoe UI,
         Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif, Helvetica Neue,
         Arial, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
@@ -23,4 +37,11 @@ textarea {
     background-color: transparent;
     border: none;
     resize: none;
+}
+
+button {
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    border: none;
 }
