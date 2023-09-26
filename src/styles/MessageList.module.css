@@ -31,7 +31,7 @@
 .icon {
     width: 30px;
     height: 30px;
-    border-radius: 3px;
+    border-radius: var(--border-radius-1);
 }
 
 .userContent, .gptContent {
@@ -71,7 +71,7 @@
     display: block;
     width: 100%;
     padding: 20px;
-    border-radius: 5px;
+    border-radius: var(--border-radius-0);
     background-color: #000;
     overflow-x: scroll;
     font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace;
@@ -98,7 +98,7 @@
     width: 22px;
     height: 22px;
     padding: 3px;
-    border-radius: 3px;
+    border-radius: var(--border-radius-1);
 }
 
 .edit:hover {
@@ -112,7 +112,7 @@
 .saveEdit, .cancelEdit {
     padding: 10px 14px;
     font-size: 14px;
-    border-radius: 3px;
+    border-radius: var(--border-radius-1);
     color: inherit;
 }
 

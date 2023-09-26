@@ -6,7 +6,7 @@
 
 .toggle, .list {
     border: solid 1px var(--border-color);
-    border-radius: 5px;
+    border-radius: var(--border-radius-0);
 }
 
 .toggle {

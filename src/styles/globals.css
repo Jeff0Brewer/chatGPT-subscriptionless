@@ -10,6 +10,8 @@
     --highlight-color: #fff1;
     --border-color: #fff3;
     --dim-text-color: #8e8ea0;
+    --border-radius-0: 5px;
+    --border-raidus-1: 3px;
 }
 
 * {
