@@ -1,6 +1,15 @@
 :root {
     --bg-color: #343540;
-    --border-color: #63636C;
+    --input-bg: #3f414f;
+    --send-hover: #212123;
+    --gpt-bg: #444654;
+    --user-bg: #343540;
+    --icon-color: #acacbe;
+    --accent-color: #0fa27f;
+    --accent-hover: #0d8f70;
+    --highlight-color: #fff1;
+    --border-color: #fff3;
+    --dim-text-color: #8e8ea0;
 }
 
 * {
@@ -23,4 +32,11 @@ textarea {
     background-color: transparent;
     border: none;
     resize: none;
+}
+
+button {
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    border: none;
 }
